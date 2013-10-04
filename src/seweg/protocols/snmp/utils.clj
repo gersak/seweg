@@ -1,5 +1,7 @@
 (in-ns 'seweg.protocols.snmp)
 
+(def ^:dynamic *timeout* 2000)
+
 ;; Variable bindings cast
 (defn vb2str [variable-bindings & options]
   (assert (every? #(= :sequence %) (map :type variable-bindings)) "There is something wrong with input parameter. Not every variable binding is a :sequence type.")
@@ -16,7 +18,7 @@
   (letfn [(hf [x] (cond 
                     (= :IpAddress (:type x)) (apply str (interpose "." (:value x)))
                     (= :Timeticks (:type x)) (:value x) ;;(Date. (long (:value x)))
-                    (or (instance? BigInteger (:value x)) (instance? clojure.lang.BigInt (:value x))) (:value x)
+                    (or (instance? BigInteger (:value x)) (instance? clojure.lang.BigInt (:value x))) (.longValue (:value x))
                     (every? string? (:value x)) (apply str  (interpose "."  (map #(apply str %) (partition 2 (:value x)))))
                     (= :noSuchInstance (:type x)) :noSuchInstance
                     :else (:value x)))]
@@ -28,7 +30,6 @@
     (let [o (split-oid (key x))
           v (val x)]
       (println (apply str "OID " (find-oid (first o)) ":" (oid2str (second o)) " = " v)))))
-
 
 (defn resolve-oids-fn [x]
   (let [ot (split-oid (-> x keys first))
@@ -45,10 +46,6 @@
 
 (defn get-rid [response]
   (-> response :message decompose-snmp-response :pdu :rid))
-
-
-
-
 
 ;; Following are functions for easier request interchange
 
@@ -105,7 +102,7 @@
   Sort of multicast traffic."
   [hosts & {:keys [community port version oids pdu-type send-interval timeout shout-port] 
                                  :or {send-interval 5
-                                      timeout 2000}
+                                      timeout *timeout*}
                                  :as receiver-options}]
   (let [c (get-snmp-channel)
         template-fn (snmp-template receiver-options)
@@ -125,7 +122,7 @@
 
 ;; Usefull functions
 (defn poke [host community & {:keys [timeout oids]
-                              :or {timeout 1000
+                              :or {timeout *timeout* 
                                    oids [[1 3 6 1 2 1 1 1 0]]}}]
   (let [get-fn (open-line host community :pdu-type :get-request)
         c (get-snmp-channel)]
@@ -146,7 +143,7 @@
     (try
       (enqueue @c (get-fn oids))
       (let [r (read-channel @c)
-            _ (wait-for-result r 1000)
+            _ (wait-for-result r *timeout*)
             vb (get-variable-bindings @r)]
         vb)
       (catch Exception e nil)
@@ -159,33 +156,69 @@
     (try
       (enqueue @c (get-fn oids))
       (let [r (read-channel @c)
-            _ (wait-for-result r 1000)
+            _ (wait-for-result r *timeout*)
             vb (get-variable-bindings @r)]
         vb)
       (catch Exception e nil)
       (finally (close @c)))))
 
-(defn snmp-get-first [version host community & oids]
-  (let [oids (vec oids)
-        get-fn (open-line host community :pdu-type :get-next-request :version version)
-        c (get-snmp-channel)
-        transmition-fn (fn [oids]
-                         (enqueue @c (get-fn oids))
-                         (let [r (read-channel @c)
-                               _ (wait-for-result r 1000)
-                               vb (get-variable-bindings @r)]
-                           vb))]
-    (try
-      (let [vb-initial (transmition-fn oids)]
-        (loop [vb (remove  #(-> % vals first empty?) vb-initial)
-               not-found (filter #(-> % vals first empty?) vb-initial)]
-          (if (empty? not-found) (sort-by #(-> % keys first) vb)
-            (let [new-vb (transmition-fn (map #(-> % keys first) not-found))
-                  found-vb (filter #(-> % second empty?) new-vb)
-                  empty-vb (remove  #(-> % second empty?) new-vb)]
-              (recur (into vb new-vb) empty-vb)))))
+(defn snmp-get-first 
+  "Returns first valid found value of oids input
+  argumetns."
+  ([version host community & oids]
+   (let [oids (vec (map normalize-oid oids))
+         get-fn (open-line host community :pdu-type :get-next-request :version version)
+         c (get-snmp-channel)
+         transmition-fn (fn [oids]
+                          (enqueue @c (get-fn oids))
+                          (let [r (read-channel @c)
+                                _ (wait-for-result r *timeout*)
+                                vb (get-variable-bindings @r)]
+                            vb))
+         valid-oids (fn [results oids]
+                      (let [get-key #(apply key %)]
+                        (remove nil?
+                                (set (for [r results ok oids :let [rk (get-key r)]]
+                                       (let [c (dec (min (count rk) (count ok)))]
+                                         (if (= (take c rk) (take c ok)) r)))))))
+         ;; Checks if value of returned result is valid...
+         checkfn (fn [x] 
+                   (let [v (apply val x)]
+                     (cond 
+                       (coll? v) (seq v)
+                       (string? v) (boolean (seq v))
+                       :else (boolean v))))]
+     (try
+       (let [vb-initial (transmition-fn oids)]
+         (loop [vb (filter checkfn vb-initial)
+                not-found (remove checkfn vb-initial)]
+           (if (empty? not-found) (sort-by #(apply key %) (valid-oids vb oids))
+             (let [new-vb (transmition-fn (map #(apply key %) not-found))
+                   found-vb (filter checkfn new-vb)
+                   empty-vb (remove checkfn new-vb)]
+               (recur (into vb found-vb) empty-vb)))))
       (catch Exception e nil)
-      (finally (close @c)))))
+      (finally (close @c))))))
+
+
+;;(def oids [[1 3 6 1 2 1 1 2] [1 3 6 1 2 1 47 1 1 1 1 11] [1 3 6 1 4 1 2636 3 1 3]])
+
+
+
+
+;;(def checkfn (fn [x] 
+;;               (let [v (apply val x)
+;;                     k (apply key x)
+;;                     c (-> k count dec)
+;;                     oids (map #(apply key %) oids)]
+;;                 (when (some #(= (subvec k 0 c) (subvec % 0 (min c (-> % count dec)))) oids)
+;;                   (cond 
+;;                     (coll? v) (do (println 1 (seq v)) (boolean (seq v)))
+;;                     (string? v) (do (println 3) (boolean (seq v)))
+;;                     :else (do (println 3) (boolean v)))))))
+
+
+;; (snmp-get-first nil "mzg-dr-11" "spzROh" [1 3 6 1 2 1 1 2] [1 3 6 1 2 1 47 1 1 1 1 11] [1 3 6 1 4 1 2636 3 1 3])
 
 (defn snmp-bulk-get [version host community & oids]
   (let [oids (vec oids)
@@ -194,7 +227,7 @@
     (try
       (enqueue @c (get-fn oids))
       (let [r (read-channel @c)
-            _ (wait-for-result r 1000)
+            _ (wait-for-result r *timeout*)
             vb (get-variable-bindings @r)]
         vb)
       (catch Exception e nil)

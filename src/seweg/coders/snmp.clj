@@ -92,7 +92,7 @@
    :report snmp-construct-decode
    :inform-request snmp-construct-decode})
 
-(defn snmp-construct-decode [v]
+(defn- snmp-construct-decode [v]
   (loop [s v
          values []]
     (if (empty? s) values 
@@ -104,7 +104,7 @@
           (recur (byte-array r1) (conj values {:type t :value (snmp-construct-decode v1)}))
           (recur (byte-array r1) (conj values {:type t :value ((t snmp-decodings) v1)})))))))
 
-(defn snmp-encode [v]
+(defn- snmp-encode [v]
   (let [t (:type v)]
     ;;(debug (apply str "Encoding " t " type."))
     (if (bit-test (t snmp-headers) 5)
@@ -113,7 +113,7 @@
         (. (BERUnit. (t snmp-headers) ((t snmp-encodings) (:value v))) bytes)
         ((t snmp-encodings) (:value v))))))
 
-(defn snmp-construct-encode [v]
+(defn- snmp-construct-encode [v]
   (byte-array (reduce concat (for [x v] (snmp-encode x)))))
 
 (def SNMP

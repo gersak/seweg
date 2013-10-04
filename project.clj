@@ -1,11 +1,18 @@
 (defproject seweg "0.1.1"
   :description "SNMP library for Clojure"
   :url "http://example.com/FIXME"
+  :aot [seweg.protocols.netconf.TransportSSH]
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :java-source-paths ["src/java"]
   :dependencies [[org.clojure/clojure "1.4.0"]
+                 [frak "0.1.3"]
                  [aleph "0.3.0-beta15"]
                  [lamina "0.5.0-beta15"]
+                 [clj-ssh "0.5.6"]
+                 [com.jcraft/jsch "0.1.50"]
                  [com.taoensso/timbre "2.0.0"]
+                 [net.i2cat.netconf/netconf4j "0.0.4"]
+                 [clj-ssh "0.5.6"]
+                 [me.raynes/fs "1.4.4"]
                  [org.clojure/math.numeric-tower "0.0.2"]])

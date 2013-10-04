@@ -5,12 +5,15 @@
         [clojure.set :only (map-invert)]
         [lamina core api]
         [gloss core io])
+  (:require [taoensso.timbre :as log])
   (:import [java.io FileOutputStream IOException]
            [java.math BigInteger]
            [java.util Date]
            [java.net InetAddress ServerSocket DatagramSocket]
-           [java.lang Exception])
-  (:require [seweg.coders.snmp :as coder :refer (SNMP)]))
+           [java.lang Exception]))
+  ;;(:require [seweg.coders.snmp :as coder :refer (SNMP)]))
+
+(load "/seweg/coders/snmp")
 
 (def snmp-version {:v1 0
                    :v2c 1
@@ -117,10 +120,8 @@
   ([port] (udp-socket {:frame (compile-frame SNMP)
                        :port port 
                        :buf-size 3000})))
-                  ;;:netty {:options  {"receiveBufferSizePredictor"  (org.jboss.netty.channel.FixedReceiveBufferSizePredictor. 1500)}}})
-     ;;)))
 
 (load "snmp/utils")
 
-(defn test-snmp []
-  (poke "172.29.52.194" "spzROh"))
+;;(defn test-snmp []
+;;  (poke "172.29.52.194" "spzROh"))

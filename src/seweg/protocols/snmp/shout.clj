@@ -9,12 +9,12 @@
   "Function \"shouts\" oids to collection of hosts. It openes one
   port through which it sends UDP packets to different targets and
   waits for their response.
-  
+
   Sort of multicast traffic."
   [hosts & {:keys [community port version oids pdu-type send-interval timeout shout-port] 
-                                 :or {send-interval 5
-                                      timeout 2000}
-                                 :as receiver-options}]
+            :or {send-interval 5
+                 timeout 2000}
+            :as receiver-options}]
   (let [c (get-snmp-channel)
         template-fn (snmp-template receiver-options)
         packets (map #(merge {:host %} (template-fn (get-new-rid))) hosts)

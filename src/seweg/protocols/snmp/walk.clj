@@ -3,15 +3,13 @@
         seweg.protocols.snmp.oid-repository
         lamina.core))
 
-(defn ^{:doc 
-         "
-  Function tries to walk OID tree as far as response
+(defn snmp-bulk-walk
+  "Function tries to walk OID tree as far as response
   contains input oid value. If it fails or times out
   function will return nil. Input OIDs accepts vector
   of OID values. Either as keywords or vectors.
 
-  Default timeout is 2s. "}
-  snmp-bulk-walk
+  Default timeout is 2s. "
   ([host community oids] (snmp-bulk-walk host community oids 2000))
   ([host community oids timeout]
    (let [bulk-fn (open-line host community :pdu-type :get-bulk-request)
@@ -42,7 +40,7 @@
     (try
       (enqueue @c (get-fn [oid]))
       (let [r (read-channel @c)
-            _ (wait-for-result r 1000)
+            _ (wait-for-result r 2000)
             vb (get-variable-bindings @r)]
         vb)
       (catch Exception e nil)
@@ -71,7 +69,7 @@
   keys of input paramater keywords. It filters data
   based on header-oids and in that order associates
   keys to found values.
-  
+
   Data is supposed to be variable bindings data."
   [data header-oids keywords]
   (assert (= (count header-oids) (count keywords)) "Count heder-oids and keywords has to be equal")
