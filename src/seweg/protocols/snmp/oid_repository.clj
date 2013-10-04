@@ -146,8 +146,43 @@
    [1 3 6 1 2 1 31 1 1 1 17] :ifConnectorPresent
    [1 3 6 1 2 1 31 1 1 1 18] :ifAlias
    [1 3 6 1 2 1 31 1 1 1 19] :ifCounterDiscountinuityTime
+   [1 3 6 1 4 1 25651] :Exalt
    [1 3 6 1 4 1 25506] :HP
-   [1 3 6 1 4 1 9] :Cisco})
+   [1 3 6 1 4 1 2636] :Juniper
+   [1 3 6 1 4 1 9] :Cisco
+   [1 3 6 1 4 1 9 9 23 1 1 1] :cdpInterfaceTable
+   [1 3 6 1 4 1 9 9 23 1 1 1 1] :cdpInterfaceInfIndex
+   [1 3 6 1 4 1 9 9 23 1 1 1 2] :cdpInterfaceEnable
+   [1 3 6 1 4 1 9 9 23 1 1 1 3] :cdpInterfaceMessageInterval
+   [1 3 6 1 4 1 9 9 23 1 1 1 4] :cdpInterfaceGroup
+   [1 3 6 1 4 1 9 9 23 1 1 1 5] :cdpInterfacePort
+   [1 3 6 1 4 1 9 9 23 1 2] :cdpCache
+   [1 3 6 1 4 1 9 9 23 1 2 1] :cdpCacheTable
+   [1 3 6 1 4 1 9 9 23 1 2 1 1] :cdpCacheEntry
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 1] :cdpCacheIfIndex
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 2] :cdpCacheDeviceIndex
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 3] :cdpCacheAddressType
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 4] :cdpCacheAddress
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 5] :cdpCacheVersion
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 6] :cdpCacheDeviceId
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 7] :cdpCacheDevicePort
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 8] :cdpCachePlatform
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 9] :cdpCacheCapabilities
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 10] :cdpCacheVTPMgmtDomain
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 11] :cdpCacheNativeVLAN
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 12] :cdpCacheDuplex
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 13] :cdpCacheApplianceID
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 14] :cdpCacheVlanID
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 15] :cdpCachePowerConsumption
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 16] :cdpCacheMTU
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 17] :cdpCacheSysName
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 18] :cdpCacheSysObjectID
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 19] :cdpCachePrimaryMgmtAddrType
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 20] :cdpCachePrimaryMgmtAddr
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 21] :cdpCacheSecondaryMgmtAddrType
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 22] :cdpCacheSecondaryMgmtAddr
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 23] :cdpCachePhysLocation
+   [1 3 6 1 4 1 9 9 23 1 2 1 1 24] :cdpCacheLastChange})
 
 
 (def repository-inv (map-invert repository))
