@@ -18,22 +18,29 @@
          :description (when (seq description)
                         (clojure.string/replace description  #"\n\s+" "\n"))}))))
 
-(def object-type-name-pattern (re-pattern (str var-name-pattern "\\s+OBJECT-TYPE")))
+(def object-type-name-pattern "^\\s*\\w+[-_]*\\d*\\w*\\s+OBJECT-TYPE")
+(def object-key-pattern #"\s*(\w+[-_]*\d*\w*)")
+
+(defn- get-object-type-key [section]
+  (keyword (second (re-find oid-key-pattern section))))
+
 
 (defn- get-object-types-data
   "Function imports OBJECT-TYPE data from
   text input of module"
   [text]
-  (let [text (remove-comments text)
-        object-sections (type-definitions text object-type-name-pattern "^\\s+::=\\s+\\{.*\\}")
-        oids-keys (map #(keyword (re-find (re-pattern var-name-pattern) %)) object-sections)
-        object-oids (map #(re-find #"(?<=\{).*(?=\})"
-                                   (re-find #"(?<=::=).*" %)) object-sections)
-        object-oids (map #(when (seq %) 
-                            (clojure.string/split (clojure.string/trim %) #"\s+")) object-oids)
-        object-oids (map #(map read-string %) object-oids)
-        object-oids (map #(map (fn [x] (if (number? x) x (keyword x))) %) object-oids)
-        object-oid-mappings (reduce conj (map #(apply hash-map %) (partition 2 (interleave oids-keys object-oids))))]
-    (hash-map 
-      :oids object-oid-mappings
-      :info (reduce conj (map parse-object-info object-sections)))))
+  (try
+    (when text
+      (let [text (remove-comments text)
+            object-sections (type-definitions text object-type-name-pattern "^\\s+::=\\s+\\{.*\\}")
+            oids-keys (map get-object-type-key object-sections)
+            object-oids (map #(re-find #"(?<=\{).*(?=\})"
+                                       (re-find #"(?<=::=).*" %)) object-sections)
+            object-oids (map #(when (seq %) 
+                                (clojure.string/split (clojure.string/trim %) #"\s+")) object-oids)
+            object-oids (map #(map read-string %) object-oids)
+            object-oids (map #(map (fn [x] (if (number? x) x (keyword x))) %) object-oids)]
+        (hash-map 
+          :oids (normalize-oid-mappings oids-keys object-oids) 
+          :info (normalize-oid-info (map parse-object-info object-sections)))))
+      (catch Exception e (.printStackTrace e))))

@@ -1,6 +1,6 @@
 (ns seweg.protocols.snmp.values-repository
-  (use [clojure.set :only (map-invert)]
-       seweg.protocols.snmp.oid-repository))
+  (:use [clojure.set :only (map-invert)])
+  (:require [seweg.protocols.snmp.oid-repository :as oids]))
 
 (def ^{:private true} repository
   {[1 3 6 1 2 1 2 2 1 3 1] "null"
@@ -136,7 +136,7 @@
   OIDs like InterfaceType or DeviceType."
   (let [oid (-> variable-binding keys first)
         value (-> variable-binding vals first)
-        known-oid (first (split-oid oid))]
+        known-oid (first (oids/split-oid oid))]
     {oid (or (get repository (try
                                (cond
                                  (vector? value) (into known-oid (seq value))

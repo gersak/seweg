@@ -9,7 +9,6 @@
 ;; During initialization repository and repository-inv variables
 ;; are set to their values
 (seweg.asn1.modules/initialize-seweg-repository)
-;(use 'seweg.asn1.modules)
 
 (def known-oids (set (keys repository)))
 
