@@ -1,6 +1,7 @@
 (ns seweg.asn1.modules
   (:require frak
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [taoensso.timbre :as timbre :refer (debug)]))
 
 
 (defn- get-module-name [text]
@@ -13,7 +14,7 @@
   "Function removes comments from
   ASN1 input text string"
   [text]
-  (clojure.string/replace text #"--.*(?=\n)" ""))
+  (when (seq text) (clojure.string/replace text #"--.*(?=\n)" "")))
 
 (defn- get-module-imports [body]
   (let [import-body (apply str (take-while #(not= % \;) (re-find #"(?s)(?<=IMPORTS).*" body)))
@@ -22,14 +23,16 @@
         clean-imports (map #(clojure.string/replace % #"\s+FROM\s+" "") (clojure.string/split import-body froms-pattern))
         clean-imports (map #(-> % clojure.string/trim-newline clojure.string/trim) clean-imports)
         import-names (map #(map clojure.string/trim (clojure.string/split % #",")) clean-imports)] 
-   (apply hash-map (interleave froms import-names))))
+    (apply hash-map (interleave froms import-names))))
 
 
 ;; Definitions 
-(defonce oids (ref {:iso [1]}))
+(def default-oid-file "./resources/default.oids")
+(defonce oids (ref (read-string (slurp default-oid-file))))
+;;(defonce oids (ref {:iso [1]}))
 (defonce objects-info (ref {}))
 
-
+;; Initialize OIDS
 
 (defn known-oid?  
   "Function returns true if last 
@@ -49,13 +52,14 @@
   inside of text that match pattern string.
 
   text is sequence of strings"
-  (memoize (fn [text pattern]
+  ;(memoize (fn [text pattern]
+  (fn [text pattern]
              (let [text (vec text)
                    found-lines (set (filter #(seq (re-find (re-pattern pattern) %)) text))]
                (vec
                  (remove nil?
                          (for [x (range (count text))]
-                           (when (found-lines (text x)) x)))))))) 
+                           (when (found-lines (text x)) x)))))))
 
 (defn- type-definitions
   "Function returns parsed sections 
@@ -64,19 +68,30 @@
   delimited by start-string pattern 
   and end-string pattern"
   [text start-string end-string]
-  (let [text (clojure.string/split-lines text)
+  (let [text (when text (clojure.string/split-lines text))
         text (vec (filter seq text))
         type-positions (find-positions text start-string)
         delimiter-positions (find-positions text end-string)
+        ;_ (println type-positions delimiter-positions)
         sections (loop [types type-positions
                         delimiters delimiter-positions
                         sections []]
+                   ;;(-> sections last println) 
                    (if-not (seq types) sections
                      (let [new-delimiters (drop-while #(> (first types) %) delimiters)]
                        (if (= (first types) (first new-delimiters))
                          (recur (rest types) (rest new-delimiters) (conj sections [(text (first types))]))
                          (recur (rest types) (rest new-delimiters) (conj sections (subvec text (first types) (inc (first new-delimiters)))))))))]
     (doall (map #(apply str (interpose "\n" %)) sections))))
+
+(defn- normalize-oid-mappings [oid-keys oid-values]
+  (when (seq oid-keys)
+    (reduce conj (map #(apply hash-map %) (partition 2 (interleave oid-keys oid-values))))))
+
+
+(defn- normalize-oid-info [infos]
+  (when (seq infos)
+    (reduce conj infos)))
 
 (defn- add-new-oid 
   "Adds new oid to oids variable"
@@ -88,9 +103,11 @@
       (dosync
         (alter oids assoc (key new-oid) (into (get @oids last-valid-oid) tail))))))
 
-(defn- add-new-oids [oids]
-  (let [new-oids (atom oids)]
-    (println (count oids) " parsed OIDS")
+(defn- add-new-oids [new-oids]
+  (let [new-oids (atom (reduce conj {} (remove #(contains? @oids (key %)) new-oids)))]
+  ;;(let [new-oids (atom oids)]
+    (println (count @new-oids) " parsed new OIDS")
+    ;;(println @new-oids)
     (while (and (-> @new-oids get-known-oids seq boolean) (-> @new-oids seq boolean))
       (doseq [x (get-known-oids @new-oids)]
         (println "Adding : " x " OID")
@@ -116,23 +133,40 @@
 (load "pure_oids")
 (load "object_type")
 (load "module_identity")
+(load "modules/doc")
 
 
 (def test-dirs "./mibs/mibs/ietf/" "./mibs/mibs/cisco/")
 
-(defn- import-dir [& dirs]
-  (when-let [definitions (apply str 
-                                (interpose "\n" 
-                                           (flatten 
-                                             (for [d dirs :let [files (fs/list-dir d)]]
-                                               (for [x files] (slurp (str d x)))))))]
-    (let [pure-oid-agent (agent definitions)
-          object-type-agent (agent definitions)
-          module-identity-agent (agent definitions)]
-      (send-off pure-oid-agent get-pure-oids-data)
-      (send-off object-type-agent get-object-types-data)
-      (send-off module-identity-agent get-module-identity-data)
-      (await pure-oid-agent object-type-agent module-identity-agent)
-      (let [all-oids (apply merge (map #(-> % deref :oids) [pure-oid-agent object-type-agent module-identity-agent]))]
+(defn import-dir [& dirs]
+  (when-let [definitions (flatten 
+                           (for [d dirs :let [files (fs/list-dir d)]]
+                             (for [x files] {:file x
+                                             :content (slurp (str d  x))})))]
+    (let [pure-oid-data (for [x definitions]
+                          (do 
+                            (debug "Extracting OBJECT IDENTIFIER from: " (:file x))
+                            (-> x :content get-pure-oids-data)))
+          object-type-data (for [x definitions]
+                             (do
+                               (debug "Extracting OBJECT-TYPE from: " (:file x))
+                               (-> x :content get-object-types-data )))
+          module-identity-data (for [x definitions]
+                                 (do
+                                   (debug "Extracting MODULE-IDENTITY from: " (:file x))
+                                   (-> x :content get-module-identity-data)))]
+      (let [all-oids (apply merge (map :oids (flatten [pure-oid-data object-type-data module-identity-data])))
+            all-info (apply merge (map :info (flatten [pure-oid-data object-type-data module-identity-data])))]
         (add-new-oids all-oids)
-        all-oids))))
+        (println
+          (count pure-oid-data) " pure OIDs extracted\n"
+          (count object-type-data) " OBJECT-TYPES extracted\n"
+          (count module-identity-data) " MODULE-IDENTITY extracted\n")
+        (remove #(contains? @oids (key %)) all-oids)))))
+
+(defn synchronize-seweg-repository []
+  (intern 'seweg.protocols.snmp.oid-repository 'repository-inv @oids)
+  (intern 'seweg.protocols.snmp.oid-repository 'repository (clojure.set/map-invert @oids)))
+
+(defn- export-default-oids [oids]
+  (spit default-oid-file oids))
