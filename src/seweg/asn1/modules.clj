@@ -28,9 +28,9 @@
 
 ;; Definitions 
 (def default-oid-file "./resources/default.oids")
+(def default-info-file "./resources/default.info")
 (defonce oids (ref (read-string (slurp default-oid-file))))
-;;(defonce oids (ref {:iso [1]}))
-(defonce objects-info (ref {}))
+(defonce info (ref {}))
 
 ;; Initialize OIDS
 
@@ -71,18 +71,19 @@
   (let [text (when text (clojure.string/split-lines text))
         text (vec (filter seq text))
         type-positions (find-positions text start-string)
-        delimiter-positions (find-positions text end-string)
-        ;_ (println type-positions delimiter-positions)
-        sections (loop [types type-positions
-                        delimiters delimiter-positions
-                        sections []]
-                   ;;(-> sections last println) 
-                   (if-not (seq types) sections
-                     (let [new-delimiters (drop-while #(> (first types) %) delimiters)]
-                       (if (= (first types) (first new-delimiters))
-                         (recur (rest types) (rest new-delimiters) (conj sections [(text (first types))]))
-                         (recur (rest types) (rest new-delimiters) (conj sections (subvec text (first types) (inc (first new-delimiters)))))))))]
-    (doall (map #(apply str (interpose "\n" %)) sections))))
+        delimiter-positions (find-positions text end-string)]
+    ;(println type-positions delimiter-positions)
+    (when (and (seq type-positions) (seq delimiter-positions))
+      (let [sections (loop [types type-positions
+                            delimiters delimiter-positions
+                            sections []]
+                       ;;(-> sections last println) 
+                       (if-not (seq types) sections
+                         (let [new-delimiters (drop-while #(> (first types) %) delimiters)]
+                           (if (= (first types) (first new-delimiters))
+                             (recur (rest types) (rest new-delimiters) (conj sections [(text (first types))]))
+                             (recur (rest types) (rest new-delimiters) (conj sections (subvec text (first types) (inc (first new-delimiters)))))))))]
+        (doall (map #(apply str (interpose "\n" %)) sections))))))
 
 (defn- normalize-oid-mappings [oid-keys oid-values]
   (when (seq oid-keys)
@@ -105,9 +106,7 @@
 
 (defn- add-new-oids [new-oids]
   (let [new-oids (atom (reduce conj {} (remove #(contains? @oids (key %)) new-oids)))]
-  ;;(let [new-oids (atom oids)]
     (println (count @new-oids) " parsed new OIDS")
-    ;;(println @new-oids)
     (while (and (-> @new-oids get-known-oids seq boolean) (-> @new-oids seq boolean))
       (doseq [x (get-known-oids @new-oids)]
         (println "Adding : " x " OID")
@@ -138,6 +137,8 @@
 
 (def test-dirs "./mibs/mibs/ietf/" "./mibs/mibs/cisco/")
 
+(declare synchronize-seweg-repository)
+
 (defn import-dir [& dirs]
   (when-let [definitions (flatten 
                            (for [d dirs :let [files (fs/list-dir d)]]
@@ -158,10 +159,12 @@
       (let [all-oids (apply merge (map :oids (flatten [pure-oid-data object-type-data module-identity-data])))
             all-info (apply merge (map :info (flatten [pure-oid-data object-type-data module-identity-data])))]
         (add-new-oids all-oids)
-        (println
-          (count pure-oid-data) " pure OIDs extracted\n"
-          (count object-type-data) " OBJECT-TYPES extracted\n"
-          (count module-identity-data) " MODULE-IDENTITY extracted\n")
+        (dosync (alter info merge all-info))
+        (debug
+          (-> (map :oids pure-oid-data) flatten count) " pure OIDs extracted\n"
+          (-> (map :oids pure-oid-data) flatten count) " OBJECT-TYPES extracted\n"
+          (-> (map :oids pure-oid-data) flatten count) " MODULE-IDENTITY extracted\n")
+        (synchronize-seweg-repository)
         (remove #(contains? @oids (key %)) all-oids)))))
 
 (defn synchronize-seweg-repository []
@@ -170,3 +173,6 @@
 
 (defn- export-default-oids [oids]
   (spit default-oid-file oids))
+
+(defn- export-default-info [info]
+  (spit default-info-file info))

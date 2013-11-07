@@ -1,4 +1,4 @@
-(defproject seweg "0.1.1"
+(defproject seweg "0.1.2"
   :description "SNMP library for Clojure"
   :url "http://example.com/FIXME"
   :aot [seweg.protocols.netconf.TransportSSH]
