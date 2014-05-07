@@ -197,8 +197,8 @@
                    found-vb (filter checkfn new-vb)
                    empty-vb (remove checkfn new-vb)]
                (recur (into vb found-vb) empty-vb)))))
-      (catch Exception e nil)
-      (finally (close @c))))))
+       (catch Exception e nil)
+       (finally (close @c))))))
 
 
 ;;(def oids [[1 3 6 1 2 1 1 2] [1 3 6 1 2 1 47 1 1 1 1 11] [1 3 6 1 4 1 2636 3 1 3]])

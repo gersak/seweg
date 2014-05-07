@@ -1,7 +1,6 @@
 (ns seweg.protocols.snmp
   (:use aleph.udp
         seweg.protocols.snmp.oid-repository 
-        seweg.coders.snmp 
         [clojure.set :only (map-invert)]
         [lamina core api]
         [gloss core io])
@@ -10,10 +9,8 @@
            [java.math BigInteger]
            [java.util Date]
            [java.net InetAddress ServerSocket DatagramSocket]
-           [java.lang Exception]))
-  ;;(:require [seweg.coders.snmp :as coder :refer (SNMP)]))
-
-(load "/seweg/coders/snmp")
+           [java.lang Exception])
+  (:require [seweg.coders.snmp :as coder :refer (SNMP) :reload-all true]))
 
 (def snmp-version {:v1 0
                    :v2c 1

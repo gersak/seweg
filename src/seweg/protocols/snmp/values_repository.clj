@@ -2,7 +2,7 @@
   (:use [clojure.set :only (map-invert)])
   (:require [seweg.protocols.snmp.oid-repository :as oids]))
 
-(def ^{:private true} repository
+(def ^{:private true} *repository*
   {[1 3 6 1 2 1 2 2 1 3 1] "null"
    [1 3 6 1 2 1 2 2 1 3 6] "ethernet"
    [1 3 6 1 2 1 2 2 1 3 18] "T1-E1"
@@ -116,6 +116,7 @@
    [1 3 6 1 2 1 1 2 1 3 6 1 4 1 9 1 1316] "catalystC2960CG"
    [1 3 6 1 2 1 1 2 1 3 6 1 4 1 9 1 1364] "catwsC2960C8tcS"
    [1 3 6 1 2 1 1 2 1 3 6 1 4 1 9 1 1395] "881GUK9"
+   [1 3 6 1 2 1 1 2 1 3 6 1 4 1 9 1 1144] "cisco3925SPE200"
    ;; HP
    [1 3 6 1 2 1 1 2 1 3 6 1 4 1 25506 11 2 1] "A-MSR900"
    [1 3 6 1 2 1 1 2 1 3 6 1 4 1 25506 11 2 14] "A-MSR30-16"
@@ -137,7 +138,7 @@
   (let [oid (-> variable-binding keys first)
         value (-> variable-binding vals first)
         known-oid (first (oids/split-oid oid))]
-    {oid (or (get repository (try
+    {oid (or (get *repository* (try
                                (cond
                                  (vector? value) (into known-oid (seq value))
                                  (number? value) (conj known-oid (int value))

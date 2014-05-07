@@ -3,7 +3,6 @@
             [me.raynes.fs :as fs]
             [taoensso.timbre :as timbre :refer (debug)]))
 
-
 (defn- get-module-name [text]
   (re-find #"(?<=\s*).*(?=\s+DEFINITIONS)" text))
 
@@ -44,8 +43,8 @@
   [new-oids]
   "Returns OIDS that are known"
   (filter #(if (every? number? %)
-                     true
-                     (known-oid? (first (drop-while number? (-> % val reverse))))) new-oids))
+             true
+             (known-oid? (first (drop-while number? (-> % val reverse))))) new-oids))
 
 (def ^:private find-positions
   "Function returns sequence of positions
@@ -135,7 +134,7 @@
 (load "modules/doc")
 
 
-(def test-dirs "./mibs/mibs/ietf/" "./mibs/mibs/cisco/")
+(def test-dirs ["./mibs/ietf/" "./mibs/cisco/"])
 
 (declare synchronize-seweg-repository)
 
@@ -167,9 +166,11 @@
         (synchronize-seweg-repository)
         (remove #(contains? @oids (key %)) all-oids)))))
 
+(load "/seweg/protocols/snmp/oid_repository")
+
 (defn synchronize-seweg-repository []
-  (intern 'seweg.protocols.snmp.oid-repository 'repository-inv @oids)
-  (intern 'seweg.protocols.snmp.oid-repository 'repository (clojure.set/map-invert @oids)))
+  (intern 'seweg.protocols.snmp.oid-repository '*repository-inv* @oids)
+  (intern 'seweg.protocols.snmp.oid-repository '*repository* (clojure.set/map-invert @oids)))
 
 (defn- export-default-oids [oids]
   (spit default-oid-file oids))

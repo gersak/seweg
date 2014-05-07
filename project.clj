@@ -1,7 +1,8 @@
 (defproject seweg "0.1.2"
   :description "SNMP library for Clojure"
   :url "http://example.com/FIXME"
-  :aot [seweg.protocols.netconf.TransportSSH]
+  :aot [seweg.protocols.netconf.TransportSSH
+        seweg.coders.snmp]
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :java-source-paths ["src/java"]

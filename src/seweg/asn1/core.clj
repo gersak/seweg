@@ -58,6 +58,6 @@
         import-names (map #(map clojure.string/trim (clojure.string/split % #",")) clean-imports)] 
     (apply hash-map (interleave froms import-names))))
 
-(def sample-imports (slurp "./mibs/cisco/CISCO-TC-V1SMI.my"))
 
+(def sample-imports (slurp "./mibs/cisco/CISCO-TC-V1SMI.my"))
 (def sample-object (slurp "./mibs/ietf/IF-MIB"))

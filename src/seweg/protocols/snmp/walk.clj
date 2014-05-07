@@ -3,6 +3,8 @@
         seweg.protocols.snmp.oid-repository
         lamina.core))
 
+(load "/seweg/coders/snmp")
+
 (defn snmp-bulk-walk
   "Function tries to walk OID tree as far as response
   contains input oid value. If it fails or times out
@@ -14,37 +16,51 @@
   ([host community oids timeout]
    (let [bulk-fn (open-line host community :pdu-type :get-bulk-request)
          oids (if (coll? oids) (map normalize-oid oids)
-                (list oids))
-         c (get-snmp-channel)
+                (list (normalize-oid oids)))
+         result (atom [])
          filter-oid-fn (fn [oid] 
                          (fn [x] (is-child-of-oid? (first (keys x)) oid)))
          transmition-fn (fn [oid]
-                          (loop [last-oid (normalize-oid oid)
-                                 result []]
-                            (enqueue @c (bulk-fn [last-oid]))
-                            (let [r (read-channel @c) 
-                                  _ (wait-for-result r timeout)
-                                  vb (get-variable-bindings @r)
-                                  last-oid (-> vb last keys first)]
-                              (if (not (is-child-of-oid? last-oid oid)) (doall (filter (filter-oid-fn oid) (into result vb)))
-                                (recur last-oid (into result vb))))))]
-     (try
-       (flatten (for [x oids] (transmition-fn x)))
-       (catch Exception e nil)
-       (finally (close @c))))))
+                          (let [c (get-snmp-channel)]
+                            (try
+                              (loop [last-oid (normalize-oid oid)]
+                                (enqueue @c (bulk-fn [last-oid]))
+                                (let [r (read-channel @c) 
+                                      _ (wait-for-result r timeout)
+                                      vb (get-variable-bindings @r)
+                                      last-oid (-> vb last keys first)]
+                                  (if (not (is-child-of-oid? last-oid oid)) 
+                                    (do 
+                                      (swap! result into (filter (filter-oid-fn oid) vb)))
+                                    (do
+                                      (swap! result into vb)
+                                      (recur (-> @result last first key))))))
+                              (catch Exception e nil)
+                              (finally (close @c)))))]
+       (doseq [x oids] 
+             (transmition-fn x))
+       @result)))
+
 
 ;; NOT FINISHED
-(defn snmp-walk [host community oid]
-  (let [get-fn (open-line host community :pdu-type :get-request)
-        c (get-snmp-channel)]
-    (try
-      (enqueue @c (get-fn [oid]))
-      (let [r (read-channel @c)
-            _ (wait-for-result r 2000)
-            vb (get-variable-bindings @r)]
-        vb)
-      (catch Exception e nil)
-      (finally (close @c)))))
+(defn snmp-walk 
+  ([host community oids] (snmp-walk host community oids 2000))
+  ([host community oids timeout]
+   (let [result (atom [])
+         oids (if (coll? oids) 
+                (map normalize-oid oids)
+                [oids])]
+     (doseq [x oids]
+       (let [x (normalize-oid x)]
+         (loop [q (snmp-get-next nil host community x)]
+           (when q
+             (let [lo (-> q ffirst key)]
+               (if-not (is-child-of-oid? lo x)
+                 @result
+                 (do
+                   (swap! result into q)
+                   (recur (snmp-get-next nil host community lo)))))))))
+     @result)))
 
 
 (defn tabelize-fix-length

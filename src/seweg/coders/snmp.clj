@@ -17,7 +17,7 @@
   (:require [gloss.data.bytes.core :as b]
             [taoensso.timbre :as timbre :refer (debug)]))
 
-(def ^{:private true} snmp-pdu-type
+(def snmp-pdu-type
   {:get-request -96 
    :get-next-request -95 
    :response -94 
@@ -29,7 +29,7 @@
    :sequence 48})
 
 
-(def ^{:private true} snmp-variables
+(def snmp-variables
   {:IpAddress 0x40
    :Counter32 0x41
    :Gauge32 0x42
@@ -44,14 +44,14 @@
    :OctetString 0x04
    :noSuchInstance -127})
 
-(def ^{:private true} snmp-headers (conj snmp-variables snmp-pdu-type))
+(def snmp-headers (conj snmp-variables snmp-pdu-type))
 
 (declare snmp-construct-decode snmp-construct-encode)
 
-(def ^{:private true} ber-hi-limit (expt 2 32))
+(def ber-hi-limit (expt 2 32))
 
 ;; Here are defined functions that encode SNMP values to their byte value 
-(def ^{:private true} snmp-encodings 
+(def snmp-encodings 
   {:Integer (fn [^Integer x] (int2ber x))
    :Null (fn [_] (byte-array (map byte [5 0])))
    :OctetString (fn [^String x] (str2ber x))
@@ -72,7 +72,7 @@
    :inform-request snmp-construct-encode})
 
 ;; Here are defined functions that decode byte values to their SNMP values 
-(def ^{:private true} snmp-decodings
+(def snmp-decodings
   {:Integer (fn [x] (ber2int x))
    :Null (fn [_] nil) 
    :OctetString (fn [x] (ber2str x))
@@ -82,38 +82,36 @@
    :Timeticks (fn [x] (ber2int x))
    :Gauge32 (fn [x] (ber2int x)) 
    :noSuchInstance (fn [_] nil)
-   :sequence snmp-construct-decode
-   :get-request snmp-construct-decode
-   :set-request snmp-construct-decode
-   :response snmp-construct-decode
-   :get-next-request snmp-construct-decode
-   :get-bulk-request snmp-construct-decode
-   :trap snmp-construct-decode
-   :report snmp-construct-decode
-   :inform-request snmp-construct-decode})
+   :sequence 'snmp-construct-decode
+   :get-request 'snmp-construct-decode
+   :set-request 'snmp-construct-decode
+   :response 'snmp-construct-decode
+   :get-next-request 'snmp-construct-decode
+   :get-bulk-request 'snmp-construct-decode
+   :trap 'snmp-construct-decode
+   :report 'snmp-construct-decode
+   :inform-request 'snmp-construct-decode})
 
-(defn- snmp-construct-decode [v]
+(defn snmp-construct-decode [v]
   (loop [s v
          values []]
     (if (empty? s) values 
       (let [u (BERUnit. s)
             t (get (map-invert snmp-headers) (.header u))
             [v1 r1] [(.value u) (drop (count (.bytes u)) s)]]
-        ;;(debug (str "Decoding " t " type."))
         (if (bit-test (.header u) 5)
           (recur (byte-array r1) (conj values {:type t :value (snmp-construct-decode v1)}))
           (recur (byte-array r1) (conj values {:type t :value ((t snmp-decodings) v1)})))))))
 
-(defn- snmp-encode [v]
+(defn snmp-encode [v]
   (let [t (:type v)]
-    ;;(debug (apply str "Encoding " t " type."))
     (if (bit-test (t snmp-headers) 5)
       (. (BERUnit. (t snmp-headers) (byte-array (reduce concat (for [x (:value v)] (snmp-encode x))))) bytes)
       (if (and (not= :Null t) (not= :noSuchInstance t))
         (. (BERUnit. (t snmp-headers) ((t snmp-encodings) (:value v))) bytes)
         ((t snmp-encodings) (:value v))))))
 
-(defn- snmp-construct-encode [v]
+(defn snmp-construct-encode [v]
   (byte-array (reduce concat (for [x v] (snmp-encode x)))))
 
 (def SNMP
@@ -123,7 +121,7 @@
       (let [u (BERUnit. (reduce concat (map #(.array %) b)))
             r (b/drop-bytes b (count (.bytes u)))
             t (get (map-invert snmp-headers) (.header u))
-            nv ((t snmp-decodings) (.value u))
+            nv ((ns-resolve 'seweg.coders.snmp (symbol (get snmp-decodings t))) (.value u))
             rb (when (seq r) (create-buf-seq (.rewind (.put (ByteBuffer/allocate (count r)) (byte-array r)))))]
         [true {:type t :value nv} rb]))
     Writer
