@@ -1,4 +1,5 @@
 (ns seweg.asn1.core
+  (:use seweg.asn1.basic-types)
   (:require frak))
 
 (defn remove-comments 
@@ -6,6 +7,30 @@
   ASN1 input text string"
   [^String text]
   (when (seq text) (clojure.string/replace text #"(--.*--|--.*(?=\n))" "")))
+
+;; New part 06.05.2014
+(defrecord ObjectIdentifier [^clojure.lang.PersistentVector oid]
+  Object
+  (toString [_] (apply str (interpose "." oid))))
+
+(defn resolve-type 
+  "For given string word returns ASN type.
+
+  Either:
+
+  :Type
+  :Value
+  :Keyword
+  "
+
+  [^String word]
+  {:pre [(= word (first (re-find #"^[\w\d]+(-{0,1}[\w\d]*)+" word)))]}
+  (cond
+    (= word (re-find #"[A-Z\-]+" word)) :ASN-Keyword
+    (= word (re-find #"^[a-z][A-Z][\w\d-]+" word)) :ASN-Value
+    (= word (re-find #"^[A-Z][a-z0-9-]+" word)) :ASN-Type
+    :else :ASN-Unknown))
+  
 
 (def sample-comment (slurp "./mibs/cisco/CISCO-SMI-V1SMI.my"))
 
