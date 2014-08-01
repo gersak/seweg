@@ -13,15 +13,14 @@
   Object
   (toString [_] (apply str (interpose "." oid))))
 
-(defn resolve-type 
+(defn resolve-primitive-definition
   "For given string word returns ASN type.
 
   Either:
 
   :Type
   :Value
-  :Keyword
-  "
+  :Keyword"
 
   [^String word]
   {:pre [(= word (first (re-find #"^[\w\d]+(-{0,1}[\w\d]*)+" word)))]}
@@ -40,12 +39,12 @@
 
   text is sequence of strings"
   (fn [text pattern]
-             (let [text (vec text)
-                   found-lines (set (filter #(seq (re-find pattern %)) text))]
-               (vec
-                 (remove nil?
-                         (for [x (range (count text))]
-                           (when (found-lines (text x)) x)))))))
+    (let [text (vec text)
+          found-lines (set (filter #(seq (re-find pattern %)) text))]
+      (vec
+        (remove nil?
+                (for [x (range (count text))]
+                  (when (found-lines (text x)) x)))))))
 
 (defn- extract-sections
   "Extracts section of text that is

@@ -6,14 +6,12 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :java-source-paths ["src/java"]
-  :dependencies [[org.clojure/clojure "1.4.0"]
-                 [frak "0.1.3"]
-                 [aleph "0.3.0"]
-                 [lamina "0.5.0"]
-                 [clj-ssh "0.5.6"]
-                 [com.jcraft/jsch "0.1.50"]
-                 [com.taoensso/timbre "2.6.2"]
-                 [net.i2cat.netconf/netconf4j "0.0.4"]
-                 [clj-ssh "0.5.6"]
-                 [me.raynes/fs "1.4.5"]
-                 [org.clojure/math.numeric-tower "0.0.2"]])
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [kovacnica/dreamcatcher "1.0.3"]
+                 [frak "0.1.6"]
+                 [aleph "0.3.2"]
+                 [lamina "0.5.2"]
+                 [org.clojure/core.unify "0.5.5"]
+                 [clj-ssh "0.5.10"]
+                 [me.raynes/fs "1.4.6"]
+                 [org.clojure/math.numeric-tower "0.0.4"]])

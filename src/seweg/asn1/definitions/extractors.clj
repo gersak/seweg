@@ -127,7 +127,7 @@
 
 
 (def asn-special-signs 
-  #{"." ".." "..." "," ";" "(" ")" "{" "}" "[" "]" "-" "<" "|" "::=" })
+  #{"." ".." "..." "," ";" "(" ")" "{" "}" "[" "]" "-" "<" "|" "::=" "“::=”"})
 
 (def asn-reader-signs 
   #{#"\.\." #"\.\.\." #"," #";" #"\(" #"\)" #"\{" #"\}" #"\[" #"\]" #"<" #"\|" #"::=" })
@@ -206,7 +206,7 @@
   (map #(get asn-elements %) idexes))
 
 (defn extract-type [asn-elements position]
-  (letfn [(extract-tag [rest-of-def-seq result]
+  (letfn [(extract-tag [[rest-of-def-seq result]] 
             (if (= "[" (first rest-of-def-seq))
               (let [tag-def (take-while #(not= "]" %) (rest rest-of-def-seq))]
                 (assert (<= 2 (count tag-def)) (str "TAG " (apply str (interpose " " tag-def)) " not defined properly!"))
@@ -217,23 +217,23 @@
                   [(drop 3 rest-of-def-seq) 
                    (merge result {:tag-domain :UNIVERSAL
                                   :tag-number (java.lang.Integer. (first tag-def))})]))
-              [rest-of-def-seq
+              [[rest-of-def-seq
                (merge result {:tag-domain :UNIVERSAL
-                              :tag-number nil})]))
-          (implicit? [rest-of-def-seq result]
+                              :tag-number nil})]]))
+          (implicit? [[rest-of-def-seq result]] 
             (if (= "IMPLICIT" (first rest-of-def-seq))
               [(rest rest-of-def-seq) (assoc result :IMPLICIT? true)] 
               (if (= "EXPLICIT" (first rest-of-def-seq))
                 [(rest rest-of-def-seq) (assoc result :EXPLICIT? true)] 
-                [rest-of-def-seq result])))]
+                [[rest-of-def-seq result]])))]
     (let [[pre-def-seq def-seq] (split-at position asn-elements)
           asn-type-name (first def-seq)
-          [asn-type-definition-seq result] (extract-tag (drop 2 def-seq) {})
-          [asn-type-definition-seq result] (implicit? asn-type-definition-seq result)]
-      (merge result {:asn-type asn-type-name
-                     :asn-type-definition asn-type-definition-seq}))))
+          [leftover-seq result] (-> [(drop 2 def-seq) {:asn-type asn-type-name}] 
+                                    extract-tag 
+                                    implicit?)]
+      result)))
   
 (defn test-extracted-elements [^clojure.lang.PersistentVector asn-elements]
   (let [positions (mark-type-definition-positions asn-elements)]
-    (extract-type  asn-elements (last positions))
-    ))
+    (when (seq positions) 
+      (map (partial extract-type asn-elements) positions))))
