@@ -1,0 +1,249 @@
+ModuleDefinition ::=
+	ModuleIdentifier
+	DEFINITIONS
+	TagDefault
+	“::=”
+	BEGIN
+	ModuleBody
+	END
+TagDefault ::=
+	EXPLICIT TAGS |
+	IMPLICIT TAGS |
+	empty
+ModuleIdentifier ::=
+	modulereference
+	AssignedIdentifier
+AssignedIdentifier ::=
+	ObjectIdentifier Value |
+	empty
+ModuleBody ::=
+	Exports Imports AssignmentList |
+	empty
+Exports ::=
+	EXPORTS SymbolsExported; |
+	empty
+SymbolsExported ::=
+	SymbolList |
+	empty
+Imports ::=
+	IMPORTS SymbolsImported; |
+	empty
+SymbolsImported ::=
+SymbolsFromModuleList |
+empty
+SymbolsFromModuleList ::=
+SymbolsFromModule SymbolsFromModuleList |
+SymbolsFromModule
+SymbolsFromModule ::=
+SymbolList FROM ModuleIdentifier
+SymbolList ::= Symbol, SymbolList | Symbol
+Symbol ::= typereference | valuereference
+AssignmentList ::=
+Assignment AssignmentList |
+Assignment
+Assignment ::= Typeassignment | Valueassignment
+Externaltypereference ::=
+modulereference
+.
+typereference
+Externalvaluereference ::=
+modulereference
+.
+valuereference
+DefinedType ::= Externaltypereference | typereference
+DefinedValue ::= Externalvaluereference | valuereference
+Typeassignment ::=
+typereference
+“::=”
+Type
+Valueassignment ::=
+valuereference
+Type
+“::=”
+Value
+Type ::= BuiltinType | DefinedType | Subtype
+BuiltinType ::=
+BooleanType |
+IntegerType |
+BitStringType |
+OctetStringType |
+NullType |
+SequenceType |
+SequenceOfType |
+SetType |
+SetOfType |
+ChoiceType |
+SelectionType |
+TaggedType |
+AnyType |
+ObjectIdentifierType |
+CharacterStringType |
+UsefulType |
+EnumeratedType |
+RealType |
+NamedType ::= identifier Type | Type | SelectionType
+Value ::= BuiltinValue | DefinedValue
+BuiltinValue ::=
+BooleanValue |
+IntegerValue |
+BitStringValue |
+OctetStringValue |
+NullValue |
+SequenceValue |
+SequenceOfValue |
+SetValue |
+SetOfValue |
+ChoiceValue |
+SelectionValue |
+TaggedValue |
+AnyValue |
+ObjectIdentifierValue |
+CharacterStringValue |
+EnumeratedValue |
+RealValue |
+NamedValue ::= identifier Value | Value
+BooleanType ::= BOOLEAN
+BooleanValue ::= TRUE | FALSE
+IntegerType ::= INTEGER | INTEGER {NamedNumberList}
+NamedNumberList ::=
+NamedNumber |
+NamedNumberList,NamedNumber
+NamedNumber ::=
+identifier(SignedNumber) |
+identifier(DefinedValue)
+SignedNumber ::= number | -number
+IntegerValue ::= SignedNumber | identifier
+EnumeratedType ::= ENUMERATED {Enumeration}
+Enumeration ::=
+NamedNumber |
+NamedNumber, Enumeration
+EnumeratedValue ::= identifier
+RealType ::= REAL
+RealValue ::= NumericRealValue | SpecialRealValue
+NumericRealValue ::= {Mantissa, Base, Exponent} | 0
+Mantissa ::= SignedNumber
+Base ::= 2 | 10
+Exponent ::= SignedNumber
+SpecialRealValue ::= PLUS-INFINITY | MINUS-INFINITY
+BitStringType ::= BIT STRING | BIT STRING {NamedBitList}
+NamedBitList ::= NamedBit | NamedBitList,NamedBit
+NamedBit ::=
+identifier(number) |
+identifier(DefinedValue)
+BitStringValue ::= bstring | hstring |{IdentifierList} | { }
+IdentifierList ::= identifier | IdentifierList,identifier
+OctetStringType ::= OCTET STRING
+OctetStringValue ::= bstring | hstring
+NullType ::= NULL
+NullValue ::= NULL
+SequenceType ::=
+SEQUENCE {ElementTypeList} |
+SEQUENCE { }
+ElementTypeList ::=
+ElementType |
+ElementTypeList,ElementType
+ElementType ::=
+NamedType |
+NamedType OPTIONAL |
+NamedType DEFAULT Value |
+COMPONENTS OF Type
+SequenceValue ::= {ElementValueList} | { }
+Fascicle VIII.4 – Rec. X.208 69
+ElementValueList ::=
+NamedValue |
+ElementValueList,NamedValue
+SequenceOfType ::= SEQUENCE OF Type | SEQUENCE
+SequenceOfValue ::= {ValueList} | { }
+ValueList ::= Value | ValueList,Value
+SetType ::= SET{ElementTypeList} | SET { }
+SetValue ::= {ElementValueList} | { }
+SetOfType ::= SET OF Type | SET
+SetOfValue ::= {ValueList} | { }
+ChoiceType ::= CHOICE{AlternativeTypeList}
+AlternativeTypeList ::=
+NamedType |
+AlternativeTypeList,NamedType
+ChoiceValue ::= NamedValue
+SelectionType ::= identifier < Type
+SelectionValue ::= NamedValue
+TaggedType ::=
+Tag Type |
+Tag IMPLICIT Type |
+Tag EXPLICIT Type
+Tag ::= [Class ClassNumber]
+ClassNumber ::= number | DefinedValue
+Class ::=
+UNIVERSAL |
+APPLICATION |
+PRIVATE |
+empty
+TaggedValue ::= Value
+AnyType ::=
+ANY |
+ANY DEFINED BY identifier
+AnyValue ::= Type Value
+ObjectIdentifierType ::= OBJECT IDENTIFIER
+ObjectIdentifierValue ::=
+{ObjIdComponentList} |
+{DefinedValue ObjIdComponentList}
+ObjIdComponentList ::=
+ObjIdComponent |
+ObjIdComponent ObjIdComponentList
+ObjIdComponent ::=
+NameForm |
+NumberForm |
+NameAndNumberForm
+NameForm ::= identifier
+NumberForm ::= number | DefinedValue
+70 Fascicle VIII.4 – Rec. X.208
+NameAndNumberForm ::= identifier(NumberForm)
+CharacterStringType ::= typereference
+CharacterStringValue ::= cstring
+UsefulType ::= typereference
+NumericString VisibleString
+PrintableString ISO646String
+TeletexString IA5String
+T61String GraphicString
+VideotexString GeneralString
+Subtype ::=
+ParentType SubtypeSpec |
+SET SizeConstraint OF Type |
+SEQUENCE SizeConstraint OF Type
+ParentType ::= Type
+SubtypeSpec ::=
+(SubtypeValueSet SubtypeValueSetList)
+SubtypeValueSetList ::=
+“|”
+SubtypeValueSet
+SubtypeValueSetList |
+empty
+SubtypeValueSet ::=
+SingleValue |
+ContainedSubtype |
+ValueRange |
+PermittedAlphabet | SizeConstraint | InnerTypeConstraint
+SingleValue ::= Value
+ContainedSubtype ::= INCLUDES Type
+ValueRange ::= LowerEndPoint . . UpperEndPoint
+LowerEndpoint ::= LowerEndValue | LowerEndValue <
+UpperEndpoint ::= UpperEndValue | <UpperEndValue
+LowerEndValue ::= Value | MIN
+UpperEndValue ::= Value | MAX
+SizeConstraint ::= SIZE SubtypeSpec
+PermittedAlphabet ::= FROM SubtypeSpec
+InnerTypeConstraints ::=
+WITH COMPONENT SingleTypeConstraint |
+WITH COMPONENTS MultipleTypeConstraints
+SingleTypeConstraint ::= SubtypeSpec
+MultipleTypeConstraints ::=
+FullSpecification | PartialSpecification
+FullSpecification ::= {TypeConstraints}
+Fascicle VIII.4 – Rec. X.208 71
+PartialSpecification ::= {. . ., TypeConstraints}
+TypeConstraints ::=
+NamedConstraint |
+NamedConstraint, TypeConstraints
+NamedConstraint ::= identifier Constraint | Constraint
+Constraint ::= ValueConstraint PresenceConstraint
+ValueConstraint ::= SubtypeSpec | empty
+PresenceConstraint ::= PRESENT | ABSENT | empty | OPTIONAL

@@ -52,16 +52,29 @@
     "MINUS-INFINITY"
     "TAGS"})
 
+(defprotocol ReferenceMemory
+  (get-reference [reference])
+  (set-reference [reference]))
+
+(defrecord ASNTypeReference [reference])
+(defrecord ASNValueReference [reference])
+(defrecord ASNMacroReference [reference])
+(defrecord ASNModuleReference [reference assigned-identifier]) 
+(defrecord ASNExternalValueReference [modulereference reference])
+(defrecord ASNExternalTypeReference [modulereference reference])
+
+
 (def asn-meaning?
   (memoize 
     (fn [^String word] 
       (cond 
+        (some (partial = word) asn-keywords) :known-keyword
         (= word (re-find #"^[a-z][\w\d-]+" word)) :valuereference
-        (= word (re-find #"^[A-Z][a-z0-9-]+" word)) :typereference
+        (= word (re-find #"^[A-Z][\w\d-]+" word)) :typereference
+        (= word (re-find #"^[A-Z][A-Z0-9-]+" word)) :macroreference
         (= word (re-find #"^[A-Z][A-Za-z0-9-]+.[A-Z][a-z0-9-]+" word)) :external-typereferece
         (= word (re-find #"^[A-Z][A-Za-z0-9-]+.[a-z][\w\d-]+" word)) :external-valuereference
         (asn-special-signs word) :asn-special-sign
-        (some (partial = word) asn-keywords) :known-keyword
         (= word (re-find #"[A-Z\-]+" word)) :unknow-keyword
         :else :asn-unknown))))
 
