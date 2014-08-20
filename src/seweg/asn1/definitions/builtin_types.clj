@@ -1,13 +1,6 @@
 (in-ns 'seweg.asn1.definitions.X208)
 
 (with-monad asn-seq-track 
-  (defn bind-value [value]
-    (fn [_]
-      (m-result value)))
-
-  (defn plain-type [asn-type & words]
-    (m-bind (apply asn-keywords words) (bind-value asn-type)))
-
   (def BooleanType 
     (domonad [_ (asn-keyword "BOOLEAN")]
              {:type :BOOLEAN :tag 1}))
@@ -63,21 +56,21 @@
                 :class :UNIVERSAL
                 :tag 3
                 :NamedBitList (reduce into {} nbl)})
-      (plain-type {:type :BIT_STRING
+      (bind-value-for {:type :BIT_STRING
                    :class :UNIVERSAL
                    :tag 3} "BIT" "STRING")))
 
   (def OctetStringType
-    (plain-type {:type :OCTET_STRING :tag 4 :class :UNIVERSAL} "OCTET" "STRING"))
+    (bind-value-for {:type :OCTET_STRING :tag 4 :class :UNIVERSAL} "OCTET" "STRING"))
 
   (def NullType
-    (plain-type {:type :NULL :tag 5} "NULL"))
+    (bind-value-for {:type :NULL :tag 5} "NULL"))
 
   (def ObjectIdentifierType
-    (plain-type {:type :OBJECT_IDENTIFIER :tag 6} "OBJECT" "IDENTIFIER"))
+    (bind-value-for {:type :OBJECT_IDENTIFIER :tag 6} "OBJECT" "IDENTIFIER"))
 
   (def RealType
-    (plain-type {:type :REAL :tag 9} "REAL"))
+    (bind-value-for {:type :REAL :tag 9} "REAL"))
 
   (def CharacterStringType typereference)
 
@@ -132,9 +125,9 @@
 
   (def TagClass
     (choice 
-      (plain-type :UNIVERSAL "UNIVERSAL")
-      (plain-type :APPLICATION "APPLICATION")
-      (plain-type :PRIVATE "PRIVATE")
+      (bind-value-for :UNIVERSAL "UNIVERSAL")
+      (bind-value-for :APPLICATION "APPLICATION")
+      (bind-value-for :PRIVATE "PRIVATE")
       (m-result nil)))
 
   (def Tag
@@ -162,7 +155,7 @@
 
   (def SequenceType
     (choice
-      (plain-type {:type :SEQUENCE :class :UNIVERSAL :tag 16} "SEQUENCE" "{" "}")
+      (bind-value-for {:type :SEQUENCE :class :UNIVERSAL :tag 16} "SEQUENCE" "{" "}")
       (domonad [_ (asn-keywords "SEQUENCE" "{")
                 elms ElementTypeList
                 _ (asn-keyword "}")]
@@ -173,7 +166,7 @@
       (domonad [_ (asn-keywords "SEQUENCE" "OF")
                 t Type]
                {:type :SEQUENCE_OF :class :UNIVERSALL :tag 16 :ofType t})
-      (plain-type {:type :SEQUENCE_OF :class :UNIVERSALL :tag 16} "SEQUENCE")))
+      (bind-value-for {:type :SEQUENCE_OF :class :UNIVERSALL :tag 16} "SEQUENCE")))
 
   (def SetType
     (choice
@@ -181,14 +174,14 @@
                 elms ElementTypeList
                 _ (asn-keyword "}")]
                {:type :SET :class :UNIVERSAL :tag 17 :ElementTypeList elms})
-      (plain-type {:type :SET :class :UNIVERSAL :tag 17} "SET" "{" "}")))
+      (bind-value-for {:type :SET :class :UNIVERSAL :tag 17} "SET" "{" "}")))
 
   (def SetOfType
     (choice
       (domonad [_ (asn-keywords "SET" "OF")
                 t Type]
                {:type :SET_OF :class :UNIVERSALL :tag 17 :ofType t})
-      (plain-type {:type :SET_OF :class :UNIVERSALL :tag 17} "SET")))
+      (bind-value-for {:type :SET_OF :class :UNIVERSALL :tag 17} "SET")))
 
   (def AlternativeTypeList
     ElementTypeList)
@@ -200,16 +193,16 @@
              {:type :CHOICE :AlternativeTypeList (reduce merge alt)}))
 
   (def NumericString
-    (plain-type {:tag 18 :type :NumericString :class :UNIVERSAL} "NumericString"))
+    (bind-value-for {:tag 18 :type :NumericString :class :UNIVERSAL} "NumericString"))
 
   (def PrintableString
-    (plain-type {:tag 19 :type :PrintableString :class :UNIVERSAL} "NumericString"))
+    (bind-value-for {:tag 19 :type :PrintableString :class :UNIVERSAL} "NumericString"))
 
   (def VisibleString 
-    (plain-type {:tag 26 :type :VisibleString :class :UNIVERSAL} "VisibleString"))
+    (bind-value-for {:tag 26 :type :VisibleString :class :UNIVERSAL} "VisibleString"))
 
   (def IA5String 
-    (plain-type {:tag 22 :type :IA5String :class :UNIVERSAL} "IA5String"))
+    (bind-value-for {:tag 22 :type :IA5String :class :UNIVERSAL} "IA5String"))
 
 
   (def BuiltinType
@@ -233,6 +226,19 @@
       NumericString
       PrintableString
       VisibleString)))
+
+(with-monad asn-seq-track
+  (def Subtype
+    (m-result nil)) 
+
+  (def DefinedType
+    typereference)
+
+  (def Type
+    (choice
+      ;Subtype
+      BuiltinType 
+      DefinedType)))
 
 (def module-test-seq (-> "mibs/ietf/IP-FORWARD-MIB" slurp split-asn-elements))
 
@@ -292,337 +298,3 @@
     inetCidrRouteStatus       RowStatus
     }"))
 
-
-
-
-;(defn satisfies-words? [asn-seq & words]
-;  (= (take (count words) asn-seq) words))
-;
-;(defn BooleanType
-;  "BooleanType ::= BOOLEAN"
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "BOOLEAN") 
-;    [(rest asn-seq) (assoc result :type :BOOLEAN :tag 1 :basic-type? true :class :UNIVERSAL)]
-;    [result asn-seq]))
-;
-;(defn IntegerType
-;  "IntegerType ::=
-;  INTEGER |
-;  INTEGER{NamedNumberList}
-;  NamedNumberList ::=
-;      NamedNumber |
-;      NamedNumberList,NamedNumber
-;  NamedNumber ::=
-;      identifier(SignedNumber) |
-;      identifier(DefinedValue)
-;  SignedNumber ::= number | -number
-;  " 
-;  [[result asn-seq]] 
-;  (if (satisfies-words? asn-seq "INTEGER") 
-;    (let [asn-seq (rest asn-seq)
-;          result (assoc result 
-;                            :type :INTEGER
-;                            :class :UNIVERSAL
-;                            :tag 2
-;                            :basic-type? true)]
-;      (if (= (first asn-seq) "{") 
-;        (let [elements (remove #{"," "(" ")" "{" "}"} (get-delimited-def asn-seq))
-;              defs (map #(list (-> % second read-string) (first %)) (partition 2 elements))]
-;          [(rest (drop-while (partial not= "}") asn-seq))
-;           (assoc result 
-;                  :named-number-list (reduce #(apply assoc %1 %2) {} defs))])
-;        [result asn-seq]))
-;    [result asn-seq]))
-;
-;(defn EnumeratedType
-;  "EnumeratedType ::= ENUMERATED {Enumeration}
-;
-;  Enumeration ::=
-;  NamedNumber |
-;  NamedNumber, Enumeration" 
-;  [[result asn-seq]] 
-;  (if (satisfies-words? asn-seq "ENUMERATED")
-;    (let [asn-seq (rest asn-seq)
-;          result (assoc result 
-;                            :type :ENUMERATED
-;                            :class :UNIVERSAL
-;                            :tag 10
-;                            :basic-type? true)]
-;      (if (= (first asn-seq) "{") 
-;        (let [explicit? (some #{"(" ")"} asn-seq)
-;              delimited-seq (get-delimited-def asn-seq)
-;              elements (remove #{"," "(" ")" "{" "}"} delimited-seq)
-;              defs (if explicit? 
-;                     (map #(list (-> % second read-string) (first %)) (partition 2 elements))
-;                     (reduce #(assoc %1 (first %2) (second %2)) {} (partition 2 (interleave (range (count elements)) elements))))]
-;          [(drop (count delimited-seq) asn-seq)
-;           (assoc result 
-;                  :named-number-list (reduce #(apply assoc %1 %2) {} defs))])
-;        [result asn-seq]))
-;    [result asn-seq]))
-;
-;(defn RealType
-;  "RealType ::= REAL"
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "REAL")
-;    [(rest asn-seq) (assoc result 
-;                           {:type :REAL
-;                            :class :UNIVERSAL
-;                            :tag 9
-;                            :basic-type? true})]
-;    [result asn-seq]))
-;
-;(defn BitStringType
-;  "BitStringType ::=
-;          BIT STRING |
-;          BIT STRING{NamedBitList}
-;  NamedBitList ::=
-;          NamedBit |
-;          NamedBitList,NamedBit
-;  NamedBit ::=
-;          identifier(number) |
-;          identifier(DefinedValue)
-;  "
-;  [[result asn-seq]]
-;  (if-let [{ros :_rest-of-seq} (unifyk '("BIT" "STRING" & :_rest-of-seq) asn-seq)]
-;    (if-let [delimited-seq (get-delimited-def ros)]
-;      [{:type :BIT_STRING 
-;        :class :UNIVERSAL
-;        :tag 3
-;        :basic-type? true
-;        :NamedBitList (reduce conj {} 
-;                              (for [x (partition 2 (remove #{"{" "}" "," "(" ")"} delimited-seq)) :let [identifier (keyword (first x))
-;                                                                                                        value (read-string (second x))]]
-;                                (if (number? value)
-;                                  [value identifier]
-;                                  [(first (DefinedValue [nil (rest x)])) identifier])))}
-;       (drop (count delimited-seq) ros)]
-;      [{:type :BIT_STRING 
-;        :class :UNIVERSAL
-;        :tag 3
-;        :basic-type? true} ros])
-;    [result asn-seq]))
-;
-;
-;(def bit-string-test (split-asn-elements "BIT STRING { a(2) , b(fucker) }"))
-;
-;
-;(defn OctetStringType
-;  "OctetStringType ::= OCTET STRING"
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "OCTET" "STRING")
-;    (let [asn-seq (drop 2 asn-seq)
-;          result (assoc result 
-;                        :type :OCTET_STRING
-;                        :class :UNIVERSAL
-;                        :tag 4
-;                        :basic-type? true)]
-;      [result asn-seq])
-;    [result asn-seq]))
-;
-;(defn NullType
-;  "NullType ::= NULL"
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "NULL")
-;    (let [asn-seq (rest asn-seq) 
-;          result (assoc result 
-;                            :type :OCTET_STRING
-;                            :class :UNIVERSAL
-;                            :tag 4
-;                            :basic-type? true)]
-;      [result asn-seq])
-;    [result asn-seq]))
-;
-;(defn SequenceType
-;  "SequenceType ::=
-;      SEQUENCE{ElementTypeList} |
-;      SEQUENCE{ }
-;  ElementTypeList ::=
-;      ElementType |
-;      ElementTypeList,ElementType
-;  ElementType ::=
-;      NamedType |
-;      NamedType OPTIONAL |
-;      NamedType DEFAULT Value"
-;  [[result asn-seq]]
-;  (if (and (satisfies-words? asn-seq "SEQUENCE") (not= "OF" (second asn-seq))) 
-;    (let [asn-seq (rest asn-seq)
-;          result (assoc result 
-;                            :type :SEQUENCE
-;                            :class :UNIVERSAL
-;                            :tag 16
-;                            :basic-type? false)]
-;      (if (= (first asn-seq) "{")
-;        (let [delimited-seq (get-delimited-def asn-seq)
-;              elements-defs (remove #{'(",")} (partition-by (partial not= ",") (butlast (rest delimited-seq))))]
-;          [(drop (count delimited-seq) asn-seq)
-;           (assoc result 
-;                  :element-type-list elements-defs)])
-;        [result asn-seq]))
-;    [result asn-seq]))
-;
-;(defn SequenceOfType
-;  "SEQUENCE OF Type | SEQUENCE" 
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "SEQUENCE" "OF")
-;    (let [asn-seq (drop 2 asn-seq)
-;          result (assoc result
-;                            :type :SEQUENCE_OF
-;                            :class :UNIVERSAL
-;                            :tag 16
-;                            :basic-type? false)]
-;      [(drop 1 asn-seq) (assoc result
-;                               :sequence-type (read-string (first asn-seq)))])
-;    [result asn-seq]))
-;
-;(defn SetType 
-;  "SetType ::=
-;      SET{ElementTypeList} |
-;      SET{ }"
-;  [[result asn-seq]]
-;  (if (and (satisfies-words? asn-seq "SET") (not= "OF" (second asn-seq))) 
-;    (let [asn-seq (rest asn-seq)
-;          result (assoc result 
-;                            :type :SET
-;                            :class :UNIVERSAL
-;                            :tag 17
-;                            :basic-type? false)]
-;      (if (= (first asn-seq) "{")
-;        (let [delimited-seq (get-delimited-def asn-seq)
-;              elements-defs (remove #{'(",")} (partition-by (partial not= ",") (butlast (rest delimited-seq))))]
-;          [(drop (count delimited-seq) asn-seq)
-;           (assoc result 
-;                  :element-type-list elements-defs)])
-;        [result asn-seq]))
-;    [result asn-seq]))
-;
-;(defn SetOfType
-;  "SET OF Type | SET" 
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "SET" "OF")
-;    (let [asn-seq (drop 2 asn-seq)
-;          result (assoc result
-;                            :type :SET_OF
-;                            :class :UNIVERSAL
-;                            :tag 17
-;                            :basic-type? false)]
-;      [(drop 1 asn-seq) (assoc result :set-type (read-string (first asn-seq)))])
-;    [result asn-seq]))
-;
-;
-;(defn ChoiceType
-;  "ChoiceType ::= CHOICE{AlternativeTypeList}
-;
-;  AlternativeTypeList ::=
-;  NamedType |
-;  AlternativeTypeList,NamedType
-;  "
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "CHOICE")
-;    (let [asn-seq (drop 1 asn-seq)
-;          result (assoc result
-;                            :type :CHOICE
-;                            :class :UNIVERSAL
-;                            :basic-type? false)]
-;      (if (= (first asn-seq) "{")
-;        (let [delimited-seq (get-delimited-def asn-seq)
-;              elements-defs (remove #{'(",")} (partition-by (partial not= ",") (butlast (rest delimited-seq))))]
-;          [(drop (count delimited-seq) asn-seq)
-;           (assoc result 
-;                  :choices elements-defs)])
-;        [result asn-seq]))
-;    [result asn-seq]))
-;
-;(defn TaggedType 
-;  "
-;  TaggedType ::=
-;          Tag Type |
-;          Tag IMPLICIT Type |
-;          Tag EXPLICIT Type
-;
-;  Tag ::= [Class ClassNumber]
-;  
-;  ClassNumber ::=
-;          number |
-;          DefinedValue
-;
-;  Class ::=
-;          UNIVERSAL |
-;          APPLICATION |
-;          PRIVATE
-;  "
-;  [[result asn-seq]]
-;  (if (= (first asn-seq) "[")
-;    (let [delimited-seq (get-delimited-def asn-seq)
-;          asn-seq (drop (count delimited-seq) asn-seq)
-;          [asn-seq tag-type] (if-let [tag-type (#{"IMPLICIT" "EXPLICIT"} (first asn-seq))]
-;                               [(rest asn-seq) tag-type]
-;                               [asn-seq "IMPLICIT"])
-;          [ClassNumber Class] (reverse delimited-seq) 
-;          tag-part (reduce conj {} 
-;                           (remove (comp nil? val) {:tag ClassNumber :class (if Class (keyword Class) :CONTEXT-SPECIFIC)}))
-;          [result asn-seq] (Type [asn-seq result])]
-;      [asn-seq (merge result tag-part)])
-;    [result asn-seq]))
-;
-;(defn ObjectIdentifierType
-;  "ObjectIdentifierType ::= OBJECT IDENTIFIER"
-;  [[result asn-seq]]
-;  (if (satisfies-words? asn-seq "OBJECT" "IDENTIFIER")
-;    (let [asn-seq (drop 2 asn-seq)
-;          result (assoc result
-;                            :type :OBJECT_IDENTIFIER
-;                            :class :UNIVERSAL
-;                            :tag 6
-;                            :basic-type? true)]
-;      [(drop 2 asn-seq) asn-seq])
-;    [result asn-seq]))
-;
-;(defn CharacterStringType
-;  "CharacterStringType ::=
-;              NumericString |
-;              PrintableString |
-;              TeletexString |
-;              VideotexString |
-;              VisibleString |
-;              IA5String |
-;              GraphicString |
-;              GeneralString "
-;  [[result asn-seq]]
-;  (let [string-types ["NumericString" "PrintableString" "TeletexString" "VideotexString"
-;                      "VisibleString" "IA5String" "GraphicString" "GeneralString"]
-;        tag-map {"NumericString" 18
-;                 "PrintableString" 19
-;                 "TeletexString" 20
-;                 "VideotexString" 21
-;                 "VisibleString" 26
-;                 "IA5String" 22
-;                 "GraphicString" 25
-;                 "GeneralString" 27}]
-;    (if-let [tag (some #{(first asn-seq)} string-types)] 
-;      [(rest asn-seq) (assoc result :type (keyword tag) :tag (get tag-map tag) :class :UNIVERSAL)]
-;      [result asn-seq])))
-
-
-;(defn BuiltinType
-;  "BuiltinType ::=
-;
-;          BooleanType |
-;          IntegerType |
-;          BitStringType |
-;          OctetStringType |
-;          NullType |
-;          SequenceType |
-;          SequenceOfType |
-;          SetType |
-;          SetOfType |
-;          ChoiceType |
-;          SelectionType |
-;          TaggedType |
-;          AnyType |
-;          ObjectIdentifierType |
-;          CharacterStringType |
-;          UsefulType |
-;          EnumeratedType |
-;          RealType"
-;  [[result asn-seq]])

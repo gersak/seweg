@@ -3,11 +3,12 @@
   (:require [clojure.core.unify :refer :all]
             [clj-tuple :as tuple :refer [tuple]]
             [clojure.algo.monads :refer :all]
+            byte-streams
             [seweg.asn1.core :refer [asn-meaning?
                                      split-asn-elements]])
   (:import [seweg.asn1.core ASNValueReference ASNTypeReference ASNMacroReference ASNModuleReference ASNExternalValueReference ASNExternalTypeReference]))
 
-(declare Type Value BuiltinType BuiltinValue DefinedValue )
+(declare Type Value BuiltinType BuiltinValue DefinedValue ObjectIdentifierValue)
 
 (def unifyk (make-unify-fn keyword?))
 
@@ -72,6 +73,25 @@
               :when (= word w)]
              true))
 
+  (defn while-m-object [object]
+    (fn [s]
+      (loop [r [] s s]
+        (if-let [[nr new-state] (object s)]
+          (if nr
+            (recur (conj r nr) new-state)
+            (if (seq r) [r s]))
+          (if (seq r) [r s])))))
+
+  (defn when-m-seq [values]
+    (fn [s]
+      (if (= (seq values) (take (count values) s))
+        [true (drop (count values) s)]
+        nil)))
+ 
+
+  (defn asn-keywords [& words]
+    (when-m-seq words))
+
   (defn match-expression [exp m-val]
     (fn [s] [(re-find exp m-val) s]))
 
@@ -121,26 +141,14 @@
               v identifier]
              (ASNExternalValueReference. m v)))
 
+  (defn bind-value [value]
+    (fn [_]
+      (m-result value)))
+
+  (defn bind-value-for [asn-type & words]
+    (m-bind (apply asn-keywords words) (bind-value asn-type)))
+
   
-
-  (defn while-m-object [object]
-    (fn [s]
-      (loop [r [] s s]
-        (if-let [[nr new-state] (object s)]
-          (if nr
-            (recur (conj r nr) new-state)
-            (if (seq r) [r s]))
-          (if (seq r) [r s])))))
-
-  (defn when-m-seq [values]
-    (fn [s]
-      (if (= (seq values) (take (count values) s))
-        [true (drop (count values) s)]
-        nil)))
-
-  (defn asn-keywords [& words]
-    (when-m-seq words))
-
   (defn choice [& definitions]
     (reduce m-plus definitions))
 
@@ -164,24 +172,6 @@
               n number 
               _ (asn-keyword ")")]
              {n id}))
-
-  (def ObjIdComponent
-    (choice NameAndNumberForm NumberForm NameForm))
-
-  (def ObjIdComponentList
-    (while-m-object ObjIdComponent))
-
-  (def ObjectIdentifierValue
-    (choice
-      (domonad [_ (asn-keyword "{")
-                dv DefinedValue
-                component-list ObjIdComponentList
-                _ (asn-keyword "{")]
-               [dv component-list])
-      (domonad [_ (asn-keyword "{")
-                component-list ObjIdComponentList
-                _ (asn-keyword "}")]
-               component-list)))
 
   (def AssignedIdentifier
     (choice 
@@ -253,8 +243,6 @@
   (def DefinedType
     typereference)
 
-
-
   (def Type
     (choice
       ;Subtype
@@ -300,17 +288,3 @@
              {:ModuleIdentifier mr
               :TagDefault tag
               :ModuleBody mb})))
-
-(defn test-monad []
-  (domonad maybe-m
-           [a 1
-            b nil 
-            c 3]
-           (list a b c)))
-
-
-(with-monad maybe-m (defn test-monad2 []
-                      (let [a nil 
-                            b 2
-                            c 3]
-                        (reduce m-plus [a c b]))))

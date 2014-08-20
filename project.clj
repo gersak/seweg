@@ -11,6 +11,7 @@
                  [frak "0.1.6"]
                  [aleph "0.3.2"]
                  [lamina "0.5.2"]
+                 [byte-streams "0.1.13"]
                  [org.clojure/core.unify "0.5.5"]
                  [clj-ssh "0.5.10"]
                  [org.clojure/algo.monads "0.1.5"]

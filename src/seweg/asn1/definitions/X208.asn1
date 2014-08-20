@@ -148,7 +148,6 @@ NamedType OPTIONAL |
 NamedType DEFAULT Value |
 COMPONENTS OF Type
 SequenceValue ::= {ElementValueList} | { }
-Fascicle VIII.4 – Rec. X.208 69
 ElementValueList ::=
 NamedValue |
 ElementValueList,NamedValue
@@ -195,7 +194,6 @@ NumberForm |
 NameAndNumberForm
 NameForm ::= identifier
 NumberForm ::= number | DefinedValue
-70 Fascicle VIII.4 – Rec. X.208
 NameAndNumberForm ::= identifier(NumberForm)
 CharacterStringType ::= typereference
 CharacterStringValue ::= cstring
