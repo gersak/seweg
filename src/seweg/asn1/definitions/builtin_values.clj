@@ -9,7 +9,10 @@
  (def IntegerValue
    (choice
      number
-     identifier))
+     (domonad 
+       [id identifier
+        :when nil]
+       id)))
  
  (def bstring
    (domonad [_ (asn-keyword "'")
@@ -23,7 +26,7 @@
  (def hstring
    (domonad [_ (asn-keyword "'")
              hdv (get-one)
-             :when (re-find #"[a-fA-f0-9]" hdv)
+             :when (when (seq hdv) (re-find #"[a-fA-f0-9]" hdv))
              _ (asn-keywords "'" "H")]
             (. javax.xml.bind.DatatypeConverter parseHexBinary hdv)))
 
@@ -78,7 +81,8 @@
    (choice
      (domonad [id identifier
                v Value]
-              {id v})))
+              {id v})
+     Value))
 
  (def ElementValueList
    (while-m-object
@@ -103,10 +107,20 @@
        Value)))
 
  (def SequenceOfValue
-   ValueList))
+   (domonad [_(asn-keyword "{")
+             vl ValueList
+             _ (asn-keyword "}")]
+            vl)))
 
 (with-monad asn-seq-track
-  (def SetValue ElementValueList)
+  (def SetValue 
+    (choice 
+      (domonad [_ (asn-keyword "{")
+                el ElementValueList
+                _ (asn-keyword "}")]
+               el)
+      (domonad [_ (asn-keywords "{" "}")]
+               #{})))
   
   (def SetOfValue
     (domonad [_ (asn-keyword "{")
@@ -144,4 +158,32 @@
   (def CharacterStringValue
     cstring)
   
-  (def EnumeratedValue identifier))
+  (def EnumeratedValue identifier)
+
+  (def ValueFunctions 
+    [#'BooleanValue
+     #'IntegerValue
+     #'RealValue  
+     #'BitStringValue
+     #'OctetStringValue
+     #'NullValue
+     #'SequenceOfValue
+     #'SequenceValue
+     #'SetOfValue
+     #'SetValue
+     ;#'ChoiceValue
+     ;#'TaggedValue
+     #'ObjectIdentifierValue
+     #'CharacterStringValue
+     #'EnumeratedValue])
+
+  (defn resolvableValue? [data]
+    (some #(when-let [r (% data)]
+             (println (apply str (repeat 10 \-)) "Resolved by" %)
+             r) ValueFunctions))
+
+  (def BuiltinValue
+    (apply choice ValueFunctions))
+  
+  (def Value
+    (choice BuiltinValue DefinedValue)))
