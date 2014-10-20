@@ -1,5 +1,4 @@
 (ns seweg.asn1.definitions.X208
-  (:use dreamcatcher.core)
   (:require [clojure.core.unify :refer :all]
             [clojure.algo.monads :refer :all]
             [taoensso.timbre :as log :refer [debug]]
@@ -166,10 +165,20 @@
 ;; ASN X208 definitions
 
 (with-monad asn-seq-track
-  (def DefinedValue 
+  (def DefinedValue
     (choice
       #'Externalvaluereference
-      #'valuereference))
+      (domonad [vr valuereference
+                known-references (fetch-val :value-reference)]
+               (do
+                ;(println (:value (get known-references vr)))
+                (if-let [r (:value (get known-references vr))]
+                 r
+                 vr)))))
+  ;(def DefinedValue 
+  ;  (choice
+  ;    #'Externalvaluereference
+  ;    #'valuereference))
 
   (def NameForm identifier)
 
@@ -180,7 +189,8 @@
               _ (asn-keyword "(")
               n number 
               _ (asn-keyword ")")]
-             {n id}))
+             n))
+             ;;{n id}))
 
   (def AssignedIdentifier
     (choice 
@@ -246,6 +256,21 @@
                symbols)
       (m-result nil))))
 
+
+
+
+(defn update-val-in [ks f]
+  (fn [s]
+    (let [ks (if-not (vector? ks) (vector ks) ks)
+          old-val (get-in s ks)
+          new-s (update-in s ks f)]
+      [old-val new-s])))
+
+(defn set-val-in [ks value]
+  (do
+    ;(println ks value)
+    (update-val-in ks (fn [_] value))))
+
   
 
 (load "builtin_values")
@@ -256,15 +281,26 @@
   (def Typeassignment
     (domonad [tr typereference
               _ (asn-keyword "::=")
-              t Type]
-             {tr t}))
+              t Type 
+              type-references (fetch-val :type-reference)
+              _ (set-val-in [:type-reference (:reference tr)]
+                            (promise))]
+             (do
+               (println tr t)
+               {tr t})))
 
   (def Valueassignment
     (domonad [vr valuereference
               tr Type
               _ (asn-keyword "::=")
-              v Value]
-             {vr [tr v]}))
+              st (fetch-val :type-reference)
+              sv (fetch-val :value-reference)
+              ;; r is monad that resolves 
+              ;; value of following sequence
+              r (get st (:type tr))
+              _ (set-val-in [:value-reference vr] 
+                            (merge {:value r} tr))]
+             {vr (merge {:value r} tr)}))
 
   (def Assignment
     (choice #'Typeassignment #'Valueassignment #'MacroDefinition))
@@ -283,15 +319,6 @@
          :AssignmentList (reduce merge as-list)})
       (m-result nil)))
 
-  ;(def ModuleDefinition 
-  ;  (domonad [mr ModuleIdentifier 
-  ;            _ (asn-keyword "DEFINITIONS")
-  ;            tag TagDefault
-  ;            _ (asn-keywords "::=" "BEGIN")]
-  ;            mb ModuleBody]
-  ;            _ (asn-keyword "END")]
-  ;"GREAT")))
-
   (def ModuleDefinition 
     (domonad [mr ModuleIdentifier 
               _ (asn-keyword "DEFINITIONS")
@@ -303,3 +330,17 @@
               :TagDefault tag
               :ModuleBody mb})))
 
+(def builtin-references
+  {:OBJECT_IDENTIFIER ObjectIdentifierValue
+   :BOOLEAN BooleanValue
+   :INTEGER IntegerValue
+   :BIT_STRING BitStringValue
+   :NULL NullValue
+   :ENUMERATED EnumeratedValue
+   :SEQUENCE SequenceValue
+   :SEQUENCE_OF SequenceOfValue
+   :SET SetValue
+   :SET_OF SetOfValue
+   ;:NumericString NumericString
+   :IA5String astring
+   :OCTET_STRING OctetStringValue})

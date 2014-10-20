@@ -144,11 +144,17 @@
                 dv DefinedValue
                 component-list ObjIdComponentList
                 _ (asn-keyword "{")]
-               [dv component-list])
+              (do
+                ;(println "referenced " dv)
+                (if (vector? dv)
+                  (reduce into dv component-list)
+                  (reduce into [dv] component-list))))
       (domonad [_ (asn-keyword "{")
                 component-list ObjIdComponentList
                 _ (asn-keyword "}")]
-               component-list)))
+               (do
+                 ;(println "flat" component-list)
+                 (vec (flatten component-list))))))
 
   (def cstring
     (domonad [cs (get-one)

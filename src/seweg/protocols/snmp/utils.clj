@@ -192,11 +192,12 @@
        (let [vb-initial (transmition-fn oids)]
          (loop [vb (filter checkfn vb-initial)
                 not-found (remove checkfn vb-initial)]
-           (if (empty? not-found) (sort-by #(apply key %) (valid-oids vb oids))
-             (let [new-vb (transmition-fn (map #(apply key %) not-found))
-                   found-vb (filter checkfn new-vb)
-                   empty-vb (remove checkfn new-vb)]
-               (recur (into vb found-vb) empty-vb)))))
+           (when (some (comp not nil?) vb)
+             (if (empty? not-found) (sort-by #(apply key %) (valid-oids vb oids))
+               (let [new-vb (transmition-fn (map #(apply key %) not-found))
+                     found-vb (filter checkfn new-vb)
+                     empty-vb (valid-oids (remove checkfn new-vb) oids)]
+                 (recur (into vb found-vb) empty-vb))))))
        (catch Exception e nil)
        (finally (close @c))))))
 
@@ -242,3 +243,4 @@
   (def filtered-channel (filter-line "RST18" @example-channel))
   (receive-all filtered-channel show-variable-bindings)
   (enqueue @example-channel (rst18 [:system])))
+

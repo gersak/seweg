@@ -1,16 +1,19 @@
 (ns seweg.protocols.snmp
-  (:use aleph.udp
-        seweg.protocols.snmp.oid-repository 
+  (:use seweg.protocols.snmp.oid-repository 
         [clojure.set :only (map-invert)]
         [lamina core api]
         [gloss core io])
-  (:require [taoensso.timbre :as log])
-  (:import [java.io FileOutputStream IOException]
-           [java.math BigInteger]
-           [java.util Date]
-           [java.net InetAddress ServerSocket DatagramSocket]
-           [java.lang Exception])
-  (:require [seweg.coders.snmp :as coder :refer (SNMP) :reload-all true]))
+  (:require [taoensso.timbre :as log]
+            [clojure.core.async :as a :refer [go-loop timeout]]
+            [seweg.coders.snmp :as coder :refer [SNMP]]
+            [aleph.udp :refer [udp-socket]])
+  (:import 
+    ;[seweg.coders.snmp SNMP]
+    [java.io FileOutputStream IOException]
+    [java.math BigInteger]
+    [java.util Date]
+    [java.net InetAddress ServerSocket DatagramSocket]
+    [java.lang Exception]))
 
 (def snmp-version {:v1 0
                    :v2c 1
@@ -118,7 +121,11 @@
                        :port port 
                        :buf-size 3000})))
 
+(defn get-snmp-async-channel
+  ()
+  )
+
 (load "snmp/utils")
 
-;;(defn test-snmp []
-;;  (poke "172.29.52.194" "spzROh"))
+(defn test-snmp []
+  (poke "172.29.52.194" "spzROh"))

@@ -331,7 +331,11 @@
              (reduce merge ss)))
   
   (def DefinedType
-    typereference)
+    (domonad [tr typereference
+              type-references (fetch-val :type-reference)]
+             (if-let [ r (get type-references (:reference tr))]
+               r
+               typereference)))
 
   (def ParentType
     (choice BuiltinType DefinedType))
