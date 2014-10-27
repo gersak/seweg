@@ -1,6 +1,5 @@
 (in-ns 'seweg.protocols.snmp)
 
-(def ^:dynamic *timeout* 2000)
 
 ;; Variable bindings cast
 (defn vb2str [variable-bindings & options]
@@ -50,9 +49,11 @@
 ;; Following are functions for easier request interchange
 
 (def rid-range [10000 500000])
-(defn generate-request-id [] (+ (first rid-range) (rand-int (- (second rid-range) (first rid-range)))))
-(defn get-new-rid [] (generate-request-id))
 
+(defn generate-request-id [] (+ (first rid-range) (rand-int (- (second rid-range) (first rid-range)))))
+
+
+(defn get-new-rid [] (generate-request-id))
 
 
 (defn open-line
@@ -94,153 +95,38 @@
              :port port}))
 
 
-(defn shout 
-  "Function \"shouts\" oids to collection of hosts. It openes one
-  port through which it sends UDP packets to different targets and
-  waits for their response.
-  
-  Sort of multicast traffic."
-  [hosts & {:keys [community port version oids pdu-type send-interval timeout shout-port] 
-                                 :or {send-interval 5
-                                      timeout *timeout*}
-                                 :as receiver-options}]
-  (let [c (get-snmp-channel)
-        template-fn (snmp-template receiver-options)
-        packets (map #(merge {:host %} (template-fn (get-new-rid))) hosts)
-        result (atom nil)]
-    (try
-      (receive-all @c #(swap! result 
-                              (fn [x] (do
-                                        (conj x (hash-map :host (:host %)
-                                                          :bindings (get-variable-bindings %)))))))
-      (doseq [x packets] (do (Thread/sleep send-interval) (enqueue @c x)))
-      @(idle-result timeout @c)
-      (catch Exception e nil)
-      (finally (close @c)))
-    @result))
+(defn tabelize-fix-length
+  "Function returns single map that has keyword
+  as fix-length input vector and a vector of values
+  as map value. Basicly it filters OID from data"
+  [data fix-oid]
+  (let [oid (normalize-oid fix-oid)
+        fd (filter #(= (take (count oid) (-> % keys first)) oid) data)]
+    fd))
 
+(defn tabelize-index
+  [data fix-oid]
+  (let [oid (normalize-oid fix-oid)
+        fd (filter #(= (take (count oid) (-> % keys first)) oid) data)
+        d (map #(vec (drop (count oid) (-> % keys first))) fd)]
+    d))
 
-;; Usefull functions
-(defn poke [host community & {:keys [timeout oids]
-                              :or {timeout *timeout* 
-                                   oids [[1 3 6 1 2 1 1 1 0]]}}]
-  (let [get-fn (open-line host community :pdu-type :get-request)
-        c (get-snmp-channel)]
-    (try 
-      (enqueue @c (get-fn oids))
-      (let [r (read-channel @c) 
-            _ (wait-for-result r timeout)
-            vb (get-variable-bindings @r)]
-        vb)
-      (catch Exception e nil)
-      (finally (close @c)))))
+(defn make-table
+  "Function creates vector of maps that have
+  keys of input paramater keywords. It filters data
+  based on header-oids and in that order associates
+  keys to found values.
 
-
-(defn snmp-get [version host community & oids]
-  (let [oids (vec oids)
-        get-fn (open-line host community :pdu-type :get-request :version version)
-        c (get-snmp-channel)]
-    (try
-      (enqueue @c (get-fn oids))
-      (let [r (read-channel @c)
-            _ (wait-for-result r *timeout*)
-            vb (get-variable-bindings @r)]
-        vb)
-      (catch Exception e nil)
-      (finally (close @c)))))
-
-(defn snmp-get-next [version host community & oids]
-  (let [oids (vec oids)
-        get-fn (open-line host community :pdu-type :get-next-request :version version)
-        c (get-snmp-channel)]
-    (try
-      (enqueue @c (get-fn oids))
-      (let [r (read-channel @c)
-            _ (wait-for-result r *timeout*)
-            vb (get-variable-bindings @r)]
-        vb)
-      (catch Exception e nil)
-      (finally (close @c)))))
-
-(defn snmp-get-first 
-  "Returns first valid found value of oids input
-  argumetns."
-  ([version host community & oids]
-   (let [oids (vec (map normalize-oid oids))
-         get-fn (open-line host community :pdu-type :get-next-request :version version)
-         c (get-snmp-channel)
-         transmition-fn (fn [oids]
-                          (enqueue @c (get-fn oids))
-                          (let [r (read-channel @c)
-                                _ (wait-for-result r *timeout*)
-                                vb (get-variable-bindings @r)]
-                            vb))
-         valid-oids (fn [results oids]
-                      (let [get-key #(apply key %)]
-                        (remove nil?
-                                (set (for [r results ok oids :let [rk (get-key r)]]
-                                       (let [c (dec (min (count rk) (count ok)))]
-                                         (if (= (take c rk) (take c ok)) r)))))))
-         ;; Checks if value of returned result is valid...
-         checkfn (fn [x] 
-                   (let [v (apply val x)]
-                     (cond 
-                       (coll? v) (seq v)
-                       (string? v) (boolean (seq v))
-                       :else (boolean v))))]
-     (try
-       (let [vb-initial (transmition-fn oids)]
-         (loop [vb (filter checkfn vb-initial)
-                not-found (remove checkfn vb-initial)]
-           (when (some (comp not nil?) vb)
-             (if (empty? not-found) (sort-by #(apply key %) (valid-oids vb oids))
-               (let [new-vb (transmition-fn (map #(apply key %) not-found))
-                     found-vb (filter checkfn new-vb)
-                     empty-vb (valid-oids (remove checkfn new-vb) oids)]
-                 (recur (into vb found-vb) empty-vb))))))
-       (catch Exception e nil)
-       (finally (close @c))))))
-
-
-;;(def oids [[1 3 6 1 2 1 1 2] [1 3 6 1 2 1 47 1 1 1 1 11] [1 3 6 1 4 1 2636 3 1 3]])
-
-
-
-
-;;(def checkfn (fn [x] 
-;;               (let [v (apply val x)
-;;                     k (apply key x)
-;;                     c (-> k count dec)
-;;                     oids (map #(apply key %) oids)]
-;;                 (when (some #(= (subvec k 0 c) (subvec % 0 (min c (-> % count dec)))) oids)
-;;                   (cond 
-;;                     (coll? v) (do (println 1 (seq v)) (boolean (seq v)))
-;;                     (string? v) (do (println 3) (boolean (seq v)))
-;;                     :else (do (println 3) (boolean v)))))))
-
-
-;; (snmp-get-first nil "mzg-dr-11" "spzROh" [1 3 6 1 2 1 1 2] [1 3 6 1 2 1 47 1 1 1 1 11] [1 3 6 1 4 1 2636 3 1 3])
-
-(defn snmp-bulk-get [version host community & oids]
-  (let [oids (vec oids)
-        get-fn (open-line host community :pdu-type :get-bulk-request :version version)
-        c (get-snmp-channel)]
-    (try
-      (enqueue @c (get-fn oids))
-      (let [r (read-channel @c)
-            _ (wait-for-result r *timeout*)
-            vb (get-variable-bindings @r)]
-        vb)
-      (catch Exception e nil)
-      (finally (close @c)))))
-
-
-
-(comment
-  "Example usage"
-  (def rst18 (open-line "RST18" "spzROh"))
-  (def example-channel (get-snmp-channel))
-  (def filtered-channel (filter-line "RST18" @example-channel))
-  (receive-all filtered-channel show-variable-bindings)
-  (enqueue @example-channel (rst18 [:system])))
-
+  Data is supposed to be variable bindings data."
+  [data header-oids keywords]
+  (assert (= (count header-oids) (count keywords)) "Count heder-oids and keywords has to be equal")
+  (let [indexes (sort (reduce into #{} (map #(tabelize-index data %) header-oids)))
+        mapped-data (if-not (map? data) (reduce into {} data))
+        mapping (apply hash-map (interleave header-oids keywords))
+        get-values (fn [index] 
+                     (apply merge 
+                            (map #(hash-map 
+                                    (get mapping %) 
+                                    (get mapped-data (into (normalize-oid %) index))) header-oids)))]
+    (map get-values indexes))) 
+ 
