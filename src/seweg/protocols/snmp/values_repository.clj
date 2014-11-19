@@ -2,7 +2,7 @@
   (:use [clojure.set :only (map-invert)])
   (:require [seweg.protocols.snmp.oid-repository :as oids]))
 
-(def ^{:private true} *repository*
+(def ^{:private true :dynamic true} *repository*
   {[1 3 6 1 2 1 2 2 1 3 1] "null"
    [1 3 6 1 2 1 2 2 1 3 6] "ethernet"
    [1 3 6 1 2 1 2 2 1 3 18] "T1-E1"

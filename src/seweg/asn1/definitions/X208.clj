@@ -126,6 +126,12 @@
   (def valuereference
     (domonad [w identifier
               :when (= :valuereference (asn-meaning? w))]
+              ;vr (fetch-val :value-reference)
+              ;_ (if-let [r (get vr w)]
+              ;    (if (realized? r)
+              ;      @r
+              ;      r)
+              ;    (set-val-in [:value-reference w] (promise)))]
              (ASNValueReference. w)))
 
   (def typereference 
@@ -171,10 +177,11 @@
       (domonad [vr valuereference
                 known-references (fetch-val :value-reference)]
                (do
-                ;(println (:value (get known-references vr)))
-                (if-let [r (:value (get known-references vr))]
-                 r
-                 vr)))))
+                 (if-let [r (get known-references vr)]
+                   (if (realized? r)
+                     (:value @r)
+                     r)
+                   vr)))))
   ;(def DefinedValue 
   ;  (choice
   ;    #'Externalvaluereference
@@ -258,7 +265,6 @@
 
 
 
-
 (defn update-val-in [ks f]
   (fn [s]
     (let [ks (if-not (vector? ks) (vector ks) ks)
@@ -281,13 +287,13 @@
   (def Typeassignment
     (domonad [tr typereference
               _ (asn-keyword "::=")
-              t Type 
-              type-references (fetch-val :type-reference)
-              _ (set-val-in [:type-reference (:reference tr)]
-                            (promise))]
-             (do
-               (println tr t)
-               {tr t})))
+              t Type]
+              ;type-references (fetch-val :type-reference)
+              ;_ (set-val-in [:type-reference (:reference tr)]
+              ;              (promise))]
+              (do
+                ;(println tr t)
+                {tr t})))
 
   (def Valueassignment
     (domonad [vr valuereference
@@ -297,9 +303,12 @@
               sv (fetch-val :value-reference)
               ;; r is monad that resolves 
               ;; value of following sequence
-              r (get st (:type tr))
-              _ (set-val-in [:value-reference vr] 
-                            (merge {:value r} tr))]
+              r (get st (:type tr))]
+              ;_ (set-val-in [:value-reference vr] 
+              ;              @(future 
+              ;                 (if (get sv vr)
+              ;                   (deliver (get sv vr) (merge {:value r} tr))
+              ;                   (deliver (promise) (merge {:value r} tr)))))]
              {vr (merge {:value r} tr)}))
 
   (def Assignment

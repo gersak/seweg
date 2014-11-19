@@ -1,18 +1,21 @@
 (ns seweg.client.simple
   (:require 
-    [clojure.core.async :refer [go <!! go-loop take! put! alts!! chan]]
-    [seweg.protocols.snmp :as s :refer [compose-snmp-packet
-                                        decompose-snmp-response
-                                        open-line
-                                        get-variable-bindings
-                                        snmp-template
-                                        get-new-rid
-                                        make-table]]
+    [clojure.core.async :as a :refer [go <!! <! go-loop take! put! alts!! chan]]
+    [clojure.network.l3.ip :as ip :refer (make-ip-address make-network)]
+    [seweg.protocols 
+     [snmp :as s :refer [compose-snmp-packet
+                         decompose-snmp-response
+                         open-line
+                         get-variable-bindings
+                         snmp-template
+                         get-new-rid
+                         make-table]]]
     [seweg.protocols.snmp.oid-repository :refer [normalize-oid is-child-of-oid? find-oid]]
     [seweg.protocols.snmp.values-repository :refer [get-known-value]]
     [seweg.coders.snmp :refer [snmp-encode snmp-decode]])
   (:import 
     [java.net
+     SocketTimeoutException
      DatagramPacket
      DatagramSocket
      InetAddress]
@@ -24,10 +27,13 @@
 
 (def ^{:dynamic true} *receive-packet-size* 2000)
 
+;; Helpers
+
 (defn- make-udp-socket 
-  ([] (doto (DatagramSocket.) (.setSoTimeout *timeout*))) 
-  ([port] (doto (DatagramSocket.) (.setSoTimeout *timeout*) (.setPort port))) 
-  ([port timeout] (doto (DatagramSocket.) (.setSoTimeout timeout) (.setPort port))))
+  ([& {:keys [timeout port] :or {timeout *timeout*}}] 
+   (if port
+     (doto (DatagramSocket.) (.setSoTimeout timeout) (.setPort port))
+     (doto (DatagramSocket.) (.setSoTimeout timeout)))))
 
 (defn- generate-udp-packet 
   ([^bytes byte-seq ^String host] (generate-udp-packet byte-seq host 161))
@@ -50,14 +56,19 @@
 (defn- proccess-udp [{:keys [message host port timeout] 
                       :as prepared-packet 
                       :or {port 161 timeout *timeout*}}]
-  (when-let [client (make-udp-socket)]
+  (when-let [client (make-udp-socket :timeout timeout)]
     (try
       (let [byte-seq (snmp-encode message)
             packet (generate-udp-packet byte-seq host)]
         (send-sync client packet))
-      (catch Exception e (.printStackTrace e))
+      (catch Exception e nil)
+      ;(catch Exception e (.printStackTrace e))
       (finally (.close client)))))
 
+
+
+
+;; Usable functions
 
 (defn poke [host community & {:keys [timeout oids]
                               :or {timeout *timeout* 
@@ -131,7 +142,7 @@
   Default timeout is 2s. "
   ([host community oids] (snmp-bulk-walk host community oids 2000))
   ([host community oids timeout]
-   (when-let [c (make-udp-socket)]
+   (when-let [c (make-udp-socket :timeout timeout)]
      (try
        (let [oids (if (coll? oids) (map normalize-oid oids)
                     (list (normalize-oid oids)))
@@ -165,9 +176,9 @@
 
 
 (defn snmp-walk 
-  ([host community oids] (snmp-walk host community oids 1000))
+  ([host community oids] (snmp-walk host community oids 2000))
   ([host community oids timeout]
-   (when-let [c (make-udp-socket)]
+   (when-let [c (make-udp-socket :timeout timeout)]
      (try
        (let [oids (if (coll? oids) (map normalize-oid oids)
                     (list (normalize-oid oids)))
@@ -198,3 +209,38 @@
        (catch Exception e nil)
        ;(catch Exception e (.printStackTrace e))
        (finally (.close c))))))
+
+(defn shout 
+  "Function \"shouts\" oids to collection of hosts. It openes one
+  port through which it sends UDP packets to different targets and
+  waits for their response.
+
+  Sort of multicast traffic."
+  [hosts & {:keys [community port version oids pdu-type send-interval timeout] 
+            :or {send-interval 5
+                 timeout *timeout*}
+            :as receiver-options}]
+  (let [c (make-udp-socket :timeout timeout) 
+        template-fn (snmp-template receiver-options)
+        packets (map #(merge {:host %} (template-fn (get-new-rid))) hosts)
+        result (atom nil)]
+    (letfn [(send-fn [{m :message h :host}]
+              (.send c (generate-udp-packet (snmp-encode m) h)))
+            (receive-fn []
+              (let [p (generate-blank-packet)]
+                (.receive c p)
+                {:host (.getHostAddress (.getAddress p)) 
+                 :port (.getPort p) 
+                 :message (snmp-decode (.getData p))}))] 
+      (try
+        (go (doseq [x packets]
+              (send-fn x)
+              (<! (a/timeout send-interval))))
+        (loop []
+          (let [rp (receive-fn)
+                vb (-> rp get-variable-bindings)]
+            (swap! result conj (hash-map :host (:host rp) :bindings vb))
+            (recur)))
+        (catch SocketTimeoutException e @result)
+        (catch Exception e (.printStackTrace e))
+        (finally (.close c))))))

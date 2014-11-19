@@ -1,4 +1,6 @@
-(ns seweg.asn1.core)
+(ns seweg.asn1.core
+  (:require [clojure.pprint :refer [pprint]])
+  )
 
 (def asn-special-signs 
   #{"." ".." "..." "," ";" "(" ")" "{" "}" "[" "]" "-" "<" "|" "::=" "\"::=\"" "\"|\""})

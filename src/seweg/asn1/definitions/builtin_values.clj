@@ -145,14 +145,15 @@
                 component-list ObjIdComponentList
                 _ (asn-keyword "{")]
               (do
-                ;(println "referenced " dv)
-                (if (vector? dv)
-                  (reduce into dv component-list)
-                  (reduce into [dv] component-list))))
+                ;(println "referenced " @dv)
+                (if (vector? @dv)
+                  (reduce into @dv component-list)
+                  (reduce into [@dv] component-list))))
       (domonad [_ (asn-keyword "{")
                 component-list ObjIdComponentList
                 _ (asn-keyword "}")]
                (do
+                ;(println "flatten " component-list)
                  ;(println "flat" component-list)
                  (vec (flatten component-list))))))
 

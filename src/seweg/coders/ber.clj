@@ -1,18 +1,13 @@
 (ns seweg.coders.ber
-  (:use [gloss io]
-        [lamina core api]
-        [gloss.core protocols]
-        [gloss.data bytes primitives]
-        [clojure.math.numeric-tower :only (abs expt)])
-  (require [clojure.zip :as zip])
+  (require [clojure.zip :as zip]
+           [clojure.math.numeric-tower :refer (abs expt)])
   (:import [java.io OutputStream FileOutputStream]
            [java.nio.channels Channels]
            [java.math BigInteger]
            [java.nio 
             ByteBuffer
             Buffer
-            ByteOrder])
-  (:gen-class :main false))
+            ByteOrder]))
 
 ;; Function handles BER encoding rules:
 ;; 1* The first octet has value 40 * value1 + value2. 

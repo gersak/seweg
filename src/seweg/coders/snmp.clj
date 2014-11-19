@@ -1,21 +1,18 @@
 (ns seweg.coders.snmp
-  (:use aleph.udp
-        seweg.coders.ber
-        [clojure.set :only (difference map-invert)]
-        [gloss.core :exclude (header)]
-        [gloss io]
-        [gloss.core.protocols :exclude  (sizeof Reader Writer)]
-        [clojure.math.numeric-tower :only (expt)]
-        [gloss.data.bytes.core :only (create-buf-seq)])
   (:import [java.io OutputStream FileOutputStream]
            [java.nio.channels Channels]
            [java.nio ByteBuffer Buffer ByteOrder]
-           [gloss.core.protocols Reader Writer]
-           [gloss.data.bytes.core SingleBufferSequence MultiBufferSequence]
+           ;[gloss.core.protocols Reader Writer]
+           ;[gloss.data.bytes.core SingleBufferSequence MultiBufferSequence]
            [ber BERUnit]
            [java.util Date])
-  (:require [gloss.data.bytes.core :as b]
-            [taoensso.timbre :as timbre :refer (debug)]))
+  (:require 
+    [seweg.coders.ber :refer :all]
+    [clojure.set :refer (difference map-invert)]
+    [gloss.core.protocols :refer (sizeof Reader Writer)]
+    [gloss.data.bytes.core :refer [create-buf-seq] :as b]
+    [clojure.math.numeric-tower :refer (expt)]
+    [taoensso.timbre :as timbre :refer (debug)]))
 
 (def snmp-pdu-type
   {:get-request -96 
@@ -96,12 +93,12 @@
   (loop [s v
          values []]
     (if (empty? s) values 
-      (let [u (BERUnit. s)
-            t (get (map-invert snmp-headers) (.header u))
-            [v1 r1] [(.value u) (drop (count (.bytes u)) s)]]
-        (if (bit-test (.header u) 5)
-          (recur (byte-array r1) (conj values {:type t :value (snmp-construct-decode v1)}))
-          (recur (byte-array r1) (conj values {:type t :value ((t snmp-decodings) v1)})))))))
+      (let [u (BERUnit. s)]
+        (when-let [t (get (map-invert snmp-headers) (.header u))] 
+          (let [ [v1 r1] [(.value u) (drop (count (.bytes u)) s)]]
+            (if (bit-test (.header u) 5)
+              (recur (byte-array r1) (conj values {:type t :value (snmp-construct-decode v1)}))
+              (recur (byte-array r1) (conj values {:type t :value ((t snmp-decodings) v1)})))))))))
 
 (defn snmp-encode [v]
   (let [t (:type v)]
@@ -113,6 +110,13 @@
 
 (defn snmp-construct-encode [v]
   (byte-array (reduce concat (for [x v] (snmp-encode x)))))
+
+
+(defn snmp-decode [#^bytes v]
+  (let [u (BERUnit. v)
+        t (get (map-invert snmp-headers) (.header u))
+        nv ((ns-resolve 'seweg.coders.snmp (symbol (get snmp-decodings t))) (.value u))]
+    {:type t :value nv}))
 
 (def SNMP
   (reify 
