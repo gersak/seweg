@@ -62,7 +62,6 @@
             packet (generate-udp-packet byte-seq host)]
         (send-sync client packet))
       (catch Exception e nil)
-      ;(catch Exception e (.printStackTrace e))
       (finally (.close client)))))
 
 

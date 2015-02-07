@@ -1,4 +1,4 @@
-(defproject seweg "0.1.6"
+(defproject seweg "0.1.7"
   :description "SNMP library for Clojure"
   :url "http://example.com/FIXME"
   :aot :all
