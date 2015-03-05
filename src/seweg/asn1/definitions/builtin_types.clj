@@ -369,7 +369,7 @@
       BuiltinType 
       DefinedType)))
 
-(def module-test-seq (-> "mibs/ietf/IP-FORWARD-MIB" slurp split-asn-elements))
+#_(def module-test-seq (-> "mibs/ietf/IP-FORWARD-MIB" slurp split-asn-elements))
 
 
 (comment 

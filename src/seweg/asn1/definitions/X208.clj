@@ -1,20 +1,19 @@
 (ns seweg.asn1.definitions.X208
   (:require [clojure.core.unify :refer :all]
             [clojure.algo.monads :refer :all]
-            [taoensso.timbre :as log :refer [debug]]
             [seweg.asn1.core :refer [asn-meaning?
                                      split-asn-elements
                                      print-asn]])
-  (:import [seweg.asn1.core 
-            ASNValueReference 
-            ASNTypeReference 
-            ASNMacroReference 
-            ASNModuleReference 
-            ASNExternalValueReference 
-            ASNExternalTypeReference 
-            ASNExternalMacroReference 
-            ASNProductionReference 
-            ASNLocalTypeReference 
+  (:import [seweg.asn1.core
+            ASNValueReference
+            ASNTypeReference
+            ASNMacroReference
+            ASNModuleReference
+            ASNExternalValueReference
+            ASNExternalTypeReference
+            ASNExternalMacroReference
+            ASNProductionReference
+            ASNLocalTypeReference
             ASNLocalValueReference]))
 
 (declare Type Value BuiltinType BuiltinValue DefinedValue ObjectIdentifierValue)
@@ -22,7 +21,7 @@
 (def unifyk (make-unify-fn keyword?))
 
 (defn- get-delimited-def [def-seq]
-  (when (#{"{" "[" "("} (first def-seq)) 
+  (when (#{"{" "[" "("} (first def-seq))
     (let [matching-brackets {"[" "]"
                              "(" ")"
                              "{" "}"}
@@ -34,7 +33,7 @@
         (let [f (first leftover)]
           (if (or (zero? c) (empty? leftover)) seq-result
             (recur (if (= f end-s) (dec c)
-                     (if (= f first-s) (inc c) c)) 
+                     (if (= f first-s) (inc c) c))
                    (rest leftover)
                    (conj seq-result (first leftover)))))))))
 
@@ -59,14 +58,14 @@
    m-zero  (fn  [new-state] nil)
 
    m-plus  (fn  [left right]
-             (fn  [state] 
-               (if-let  [result  (left state)] 
-                 result 
+             (fn  [state]
+               (if-let  [result  (left state)]
+                 result
                  (right state))))])
 
 
 
-;; PARSERER FUNCTIONS 
+;; PARSERER FUNCTIONS
 
 (with-monad asn-seq-track
   ; PREPARATION AND STATE CHANGES
@@ -100,7 +99,7 @@
             (recur (conj r nr) new-state)
             (if (seq r) [r s]))
           (if (seq r) [r s])))))
-  
+
   (defn asn-keyword [word]
     (domonad [w (get-one)
               :when (= word w)]
@@ -134,12 +133,12 @@
               ;    (set-val-in [:value-reference w] (promise)))]
              (ASNValueReference. w)))
 
-  (def typereference 
+  (def typereference
     (domonad [w identifier
               :when (= :typereference (asn-meaning? w))]
              (ASNTypeReference. w)))
 
-  (def macroreference 
+  (def macroreference
     (domonad [w identifier
               :when (= :typereference (asn-meaning? w))]
              (ASNMacroReference. w)))
@@ -150,7 +149,7 @@
              (read-string n)))
 
   (def Externalvaluereference
-    (domonad [m identifier 
+    (domonad [m identifier
               _ (asn-keyword ".")
               v identifier]
              (ASNExternalValueReference. m v)))
@@ -162,7 +161,7 @@
   (defn bind-value-for [asn-type & words]
     (m-bind (apply asn-keywords words) (bind-value asn-type)))
 
-  
+
   (defn choice [& definitions]
     (reduce m-plus definitions))
 
@@ -182,7 +181,7 @@
                      (:value @r)
                      r)
                    vr)))))
-  ;(def DefinedValue 
+  ;(def DefinedValue
   ;  (choice
   ;    #'Externalvaluereference
   ;    #'valuereference))
@@ -192,20 +191,20 @@
   (def NumberForm (choice #'number #'DefinedValue))
 
   (def NameAndNumberForm
-    (domonad [id identifier 
+    (domonad [id identifier
               _ (asn-keyword "(")
-              n number 
+              n number
               _ (asn-keyword ")")]
              n))
              ;;{n id}))
 
   (def AssignedIdentifier
-    (choice 
-      #'ObjectIdentifierValue 
+    (choice
+      #'ObjectIdentifierValue
       (m-result nil)))
 
   (def TagDefault
-    (choice 
+    (choice
       (domonad [_ (asn-keywords "EXPLICIT" "TAGS")]
                {:TagDefault :EXPLICIT})
       (domonad [_ (asn-keywords "IMPLICIT" "TAGS")]
@@ -219,10 +218,10 @@
 
   (def Symbol
     (choice #'typereference #'valuereference #'macroreference))
-  
+
   (def SymbolList
-    (while-m-object 
-      (choice 
+    (while-m-object
+      (choice
         (domonad [s Symbol
                   _ asn-comma]
                  s)
@@ -251,10 +250,10 @@
   (def SymbolsFromModuleList
     (domonad [imports (while-m-object SymbolsFromModule)]
              imports))
-  
+
   (def SymbolsImported
     (choice #'SymbolsFromModuleList (m-result nil)))
-  
+
   (def Imports
     (choice
       (domonad [_ (asn-keyword "IMPORTS")
@@ -277,7 +276,7 @@
     ;(println ks value)
     (update-val-in ks (fn [_] value))))
 
-  
+
 
 (load "builtin_values")
 (load "builtin_types")
@@ -301,11 +300,11 @@
               _ (asn-keyword "::=")
               st (fetch-val :type-reference)
               sv (fetch-val :value-reference)
-              ;; r is monad that resolves 
+              ;; r is monad that resolves
               ;; value of following sequence
               r (get st (:type tr))]
-              ;_ (set-val-in [:value-reference vr] 
-              ;              @(future 
+              ;_ (set-val-in [:value-reference vr]
+              ;              @(future
               ;                 (if (get sv vr)
               ;                   (deliver (get sv vr) (merge {:value r} tr))
               ;                   (deliver (promise) (merge {:value r} tr)))))]
@@ -313,13 +312,13 @@
 
   (def Assignment
     (choice #'Typeassignment #'Valueassignment #'MacroDefinition))
-  
+
   (def AssignmentList
     (while-m-object Assignment))
 
   (def ModuleBody
-    (choice 
-      (domonad 
+    (choice
+      (domonad
         [exports Exports
          imports Imports
          as-list AssignmentList]
@@ -328,8 +327,8 @@
          :AssignmentList (reduce merge as-list)})
       (m-result nil)))
 
-  (def ModuleDefinition 
-    (domonad [mr ModuleIdentifier 
+  (def ModuleDefinition
+    (domonad [mr ModuleIdentifier
               _ (asn-keyword "DEFINITIONS")
               tag TagDefault
               _ (asn-keywords "::=" "BEGIN")

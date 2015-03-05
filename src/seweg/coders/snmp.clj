@@ -2,26 +2,21 @@
   (:import [java.io OutputStream FileOutputStream]
            [java.nio.channels Channels]
            [java.nio ByteBuffer Buffer ByteOrder]
-           ;[gloss.core.protocols Reader Writer]
-           ;[gloss.data.bytes.core SingleBufferSequence MultiBufferSequence]
            [ber BERUnit]
            [java.util Date])
-  (:require 
+  (:require
     [seweg.coders.ber :refer :all]
     [clojure.set :refer (difference map-invert)]
-    [gloss.core.protocols :refer (sizeof Reader Writer)]
-    [gloss.data.bytes.core :refer [create-buf-seq] :as b]
-    [clojure.math.numeric-tower :refer (expt)]
-    [taoensso.timbre :as timbre :refer (debug)]))
+    [clojure.math.numeric-tower :refer (expt)]))
 
 (def snmp-pdu-type
-  {:get-request -96 
-   :get-next-request -95 
-   :response -94 
-   :set-request -93 
+  {:get-request -96
+   :get-next-request -95
+   :response -94
+   :set-request -93
    :get-bulk-request -91
-   :inform-request -90 
-   :trap -89 
+   :inform-request -90
+   :trap -89
    :report -88
    :sequence 48})
 
@@ -47,8 +42,8 @@
 
 (def ber-hi-limit (expt 2 32))
 
-;; Here are defined functions that encode SNMP values to their byte value 
-(def snmp-encodings 
+;; Here are defined functions that encode SNMP values to their byte value
+(def snmp-encodings
   {:Integer (fn [^Integer x] (int2ber x))
    :Null (fn [_] (byte-array (map byte [5 0])))
    :OctetString (fn [^String x] (str2ber x))
@@ -68,16 +63,16 @@
    :set-request snmp-construct-encode
    :inform-request snmp-construct-encode})
 
-;; Here are defined functions that decode byte values to their SNMP values 
+;; Here are defined functions that decode byte values to their SNMP values
 (def snmp-decodings
   {:Integer (fn [x] (ber2int x))
-   :Null (fn [_] nil) 
+   :Null (fn [_] nil)
    :OctetString (fn [x] (ber2str x))
    :OID (fn [x] (ber-oid-decode x))
    :IpAddress (fn [x] (vec (map ubyte x)))
    :Counter32 (fn [x] (rem (ber2int x) ber-hi-limit))
    :Timeticks (fn [x] (ber2int x))
-   :Gauge32 (fn [x] (ber2int x)) 
+   :Gauge32 (fn [x] (ber2int x))
    :noSuchInstance (fn [_] nil)
    :sequence 'snmp-construct-decode
    :get-request 'snmp-construct-decode
@@ -92,9 +87,9 @@
 (defn snmp-construct-decode [v]
   (loop [s v
          values []]
-    (if (empty? s) values 
+    (if (empty? s) values
       (let [u (BERUnit. s)]
-        (when-let [t (get (map-invert snmp-headers) (.header u))] 
+        (when-let [t (get (map-invert snmp-headers) (.header u))]
           (let [ [v1 r1] [(.value u) (drop (count (.bytes u)) s)]]
             (if (bit-test (.header u) 5)
               (recur (byte-array r1) (conj values {:type t :value (snmp-construct-decode v1)}))
@@ -117,20 +112,3 @@
         t (get (map-invert snmp-headers) (.header u))
         nv ((ns-resolve 'seweg.coders.snmp (symbol (get snmp-decodings t))) (.value u))]
     {:type t :value nv}))
-
-(def SNMP
-  (reify 
-    Reader
-    (read-bytes [_ b]
-      (let [u (BERUnit. (reduce concat (map #(.array %) b)))
-            r (b/drop-bytes b (count (.bytes u)))
-            t (get (map-invert snmp-headers) (.header u))
-            nv ((ns-resolve 'seweg.coders.snmp (symbol (get snmp-decodings t))) (.value u))
-            rb (when (seq r) (create-buf-seq (.rewind (.put (ByteBuffer/allocate (count r)) (byte-array r)))))]
-        [true {:type t :value nv} rb]))
-    Writer
-    (sizeof [_] nil)
-    (write-bytes [_ buf v]
-      (let [nv (snmp-encode v)
-            buf (ByteBuffer/allocate (count nv))]
-        (create-buf-seq (.rewind (.put buf nv)))))))
