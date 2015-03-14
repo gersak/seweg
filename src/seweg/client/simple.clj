@@ -225,7 +225,8 @@
   (with-open [c (make-udp-socket :timeout timeout)]
     (let [template-fn (snmp-template receiver-options)
           result (atom nil)
-          packets (map #(merge {:host %} (template-fn (get-new-rid))) hosts)]
+          packets (map #(merge {:host %} (template-fn (get-new-rid))) hosts)
+          receive-chan (chan)]
       (letfn [(send-fn [{m :message h :host}]
                 (when-not (.isClosed c)
                   (try
@@ -234,25 +235,25 @@
                     (catch Exception e
                       (println "Couldn't generate and send udp-packet to host " h "\nPACKET:\n" (pr-str m))))))
               (receive-fn []
-                (let [p (generate-blank-packet)]
-                  (.receive c p)
-                  {:host (.getHostAddress (.getAddress p))
-                   :port (.getPort p)
-                   :message (snmp-decode (.getData p))}))]
+                (try
+                  (let [p (generate-blank-packet)]
+                    (.receive c p)
+                    {:host (.getHostAddress (.getAddress p))
+                     :port (.getPort p)
+                     :message (snmp-decode (.getData p))})
+                  (catch SocketTimeoutException e nil)
+                  (catch SocketException e nil)))]
         (try
           (go
-           (doseq [x packets]
-             (send-fn x)
-             (<! (a/timeout send-interval))))
-          (loop []
-            (let [rp (receive-fn)
-                  vb (-> rp get-variable-bindings)]
-              (swap! result conj (hash-map :host (:host rp) :bindings vb))
-              (recur)))
-          (catch SocketTimeoutException e @result)
-          (catch SocketException e @result)
+            (doseq [x packets]
+              (send-fn x)
+              (<! (a/timeout send-interval))))
+          (loop [result nil]
+            (if-let [rp (receive-fn)]
+              (recur (conj result (hash-map :host (:host rp) :bindings (-> rp get-variable-bindings))))
+              result))
           (catch Exception e (do
-                              (.printStackTrace e))))))))
+                               (.printStackTrace e))))))))
 
 (defn shout-some [hosts & {:keys [timeout oids community version send-interval timeout port pdu-type]
                            :or {timeout *timeout*
@@ -295,3 +296,22 @@
                                    (.printStackTrace e))))))))))
 
 
+
+#_(defn discover-hosts
+  "Function sends system OIDs to addresses in network
+  collection. If there is no response for 2s it returns
+  result that contains seq of returned resposes"
+  [all-addresses & {:keys [timeout send-interval community] :or {timeout 10000 send-interval 2 community "spzROh"}}]
+  (let [poke-oids [[1 3 6 1 2 1 1 2 0] [1 3 6 1 2 1 1 5 0] [1 3 6 1 2 1 1 6 0] [1 3 6 1 2 1 47 1 1 1 1 11 1] [1 3 6 1 2 1 1 3 0]]
+        hosts-data (shout all-addresses :community (or community "spzROh") :oids poke-oids :timeout timeout :send-interval 5)
+        pretty-data (fn [x]
+                      (let [vb (:bindings x)
+                            vendor (->> vb first vals first (take 7) vec find-oid)
+                            vb (map get-known-value vb)
+                            r (apply hash-map (interleave [:device-type :name :location :serial-number :uptime] (reduce into [] (map vals vb))))]
+                        (assoc r
+                               :community community
+                               :vendor vendor
+                               :ip-address (:host x)
+                               :device (str (:serial-number r) "@" (when vendor (name vendor))))))]
+    (map pretty-data hosts-data)))
