@@ -295,23 +295,3 @@
               (catch Exception e (do
                                    (.printStackTrace e))))))))))
 
-
-
-#_(defn discover-hosts
-  "Function sends system OIDs to addresses in network
-  collection. If there is no response for 2s it returns
-  result that contains seq of returned resposes"
-  [all-addresses & {:keys [timeout send-interval community] :or {timeout 10000 send-interval 2 community "spzROh"}}]
-  (let [poke-oids [[1 3 6 1 2 1 1 2 0] [1 3 6 1 2 1 1 5 0] [1 3 6 1 2 1 1 6 0] [1 3 6 1 2 1 47 1 1 1 1 11 1] [1 3 6 1 2 1 1 3 0]]
-        hosts-data (shout all-addresses :community (or community "spzROh") :oids poke-oids :timeout timeout :send-interval 5)
-        pretty-data (fn [x]
-                      (let [vb (:bindings x)
-                            vendor (->> vb first vals first (take 7) vec find-oid)
-                            vb (map get-known-value vb)
-                            r (apply hash-map (interleave [:device-type :name :location :serial-number :uptime] (reduce into [] (map vals vb))))]
-                        (assoc r
-                               :community community
-                               :vendor vendor
-                               :ip-address (:host x)
-                               :device (str (:serial-number r) "@" (when vendor (name vendor))))))]
-    (map pretty-data hosts-data)))

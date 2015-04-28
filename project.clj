@@ -7,7 +7,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :java-source-paths ["src/java"]
-  :dependencies [[org.clojure/clojure "1.7.0-alpha3"]
+  :dependencies [[org.clojure/clojure "1.7.0-beta1"]
                  [frak "0.1.6"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [clojure.network "0.1.0-beta3"]
