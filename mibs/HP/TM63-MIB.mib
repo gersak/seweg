@@ -1,0 +1,1380 @@
+TM63-MIB DEFINITIONS ::= BEGIN
+
+-- Title:       Lanex OptiLine 16 (TM63) MIB
+-- Date:        January 01, 2002
+-- Contact:	Dariusz Kusinski, <dkusinski@lanex.pl>
+
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+    ObjectName, DateAndTime, Integer32,IpAddress
+        FROM SNMPv2-SMI
+    DisplayString,TEXTUAL-CONVENTION
+        FROM SNMPv2-TC;
+ 
+
+-- groups in MIB-II
+lanex       	OBJECT IDENTIFIER ::= { enterprises 5746 }
+telecom       	OBJECT IDENTIFIER ::= { lanex 1 }
+
+
+main       		OBJECT IDENTIFIER ::= { OptiLine16 1 }
+configuration	OBJECT IDENTIFIER ::= { OptiLine16 2 }
+status  		OBJECT IDENTIFIER ::= { OptiLine16 3 }
+EventLog  		OBJECT IDENTIFIER ::= { OptiLine16 4 }
+es  			OBJECT IDENTIFIER ::= { OptiLine16 5 }
+test			OBJECT IDENTIFIER ::= { OptiLine16 6 }
+
+
+
+Hundredths ::= TEXTUAL-CONVENTION
+DISPLAY-HINT "d-2"
+STATUS       current
+DESCRIPTION
+           "example: tranform 1234 to 12.34"
+SYNTAX     INTEGER (0..65535)
+
+
+OptiLine16 MODULE-IDENTITY
+    LAST-UPDATED "0112140000Z"
+    ORGANIZATION "Lanex"
+    CONTACT-INFO
+	   "         Technical Support
+
+	     Postal: Lanex
+		     Ceramiczna 8 Str.
+		     20-150 Lublin
+		     Poland
+
+		Tel: +48 (81) 441 10 11
+		Fax: +48 (81) 740 35 70
+
+	     E-mail: snmp@lanex.pl"
+
+    DESCRIPTION
+	    ""
+    ::= { telecom 2 }
+
+
+
+------------------------------------------------------------------------------
+-- MAIN Group
+--
+--
+mainDeviceName OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..16))
+    MAX-ACCESS  read-write
+    STATUS  	current
+    DESCRIPTION
+	    "Device Name (text - 16 chars)"
+    ::= { main 1 }
+
+mainDeviceDescription  OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..16))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Device Description (text - 16 chars)"
+    ::= { main 2 }
+
+mainDeviceType OBJECT-TYPE
+    SYNTAX  	INTEGER (0..255)
+    MAX-ACCESS	read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Device Type:
+	     44 - TM-44
+	     49 - TM-60
+	     60 - TM-60
+             61 - TM-61
+	     62 - OptiLine 4 (TM-62)
+             63 - OptiLine 16 (TM-63)"
+    ::= { main 3 }
+
+mainHardwareVersion OBJECT-TYPE
+    SYNTAX	INTEGER (0..255)
+    MAX-ACCESS  read-only
+    STATUS	current
+    DESCRIPTION
+	    "Factory hardware version  
+             (example: TM-63.x ,x-factory version)"
+    ::= { main 4 }
+
+mainLNMPAddress OBJECT-TYPE
+    SYNTAX  	Integer32
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Device address used in Lanex Network Managing Protocol for LanWin application"
+    ::= { main 5 }
+
+mainDevicePhysicalNumber OBJECT-TYPE
+    SYNTAX  	INTEGER (0..65535)
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    	    "Device physical number"
+    ::= { main 6 }
+
+mainDeviceSoftwareVersion OBJECT-TYPE
+    SYNTAX       INTEGER (0..65535)
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  
+	    "Software version of programmable cirquit (PLD)
+             example: 101 means 1.01 version"
+	    ::= {main 7 }
+
+mainSoftwareVersion OBJECT-TYPE
+    SYNTAX       INTEGER (0..65535)
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION  
+	    "Software version
+	    	example: 101 means 1.01 version"	    
+       ::= { main 8 }
+
+mainPasswordActivity OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  
+		"Activity of password granting the device access: 0 - password not requied 1- password requied"
+
+       ::= { main 9 }
+
+   mainPassword  OBJECT-TYPE
+       SYNTAX       OCTET STRING (SIZE (0..8))
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Device access password"
+       ::= { main 10 }
+
+
+   mainDateTime OBJECT-TYPE
+    SYNTAX       DateAndTime 
+    MAX-ACCESS   read-write
+    STATUS       current
+    DESCRIPTION  
+		"System date and time"
+     ::= { main 11 }
+
+
+
+------------------------------------------------------------------------------
+-- CONFIGURATION Group
+--
+--
+
+   confZKS OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Enablig/disabling tributary channels 1-16.
+                     Bits 0 to 15 - setting the appropriate bit to value 1 causes enabling the tributary channel
+                     but seting to 0 causes disabling tributary channel.
+
+                     bit   :   15    14    13    12    11    10    9     8
+                     name  : ZKS16 ZKS15 ZKS14 ZKS13 ZKS12 ZKS11 ZKS10 ZKS9
+
+                     bit   :   7     6     5     4     3     2      1     0
+                     name  : ZKS8  ZKS7   ZKS6  ZKS5 ZKS4   ZKS3   ZKS2  ZKS1"
+       ::= { configuration 1 }
+
+   confAISL OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Generating AIS Signal in an appropriate Tributary channel 1-16
+                     Forcing the AIS Signal in appropriate tributary channel 
+                     (AISLx = 1 - forcing AIS signal in the tributary channel no. x)
+                     
+                     bit   :   15      14       13       12      11      10      9       8
+                     name : AISL16  AISL15   AISL14  AISL13   AISL12  AISL11  AISL10   AISL9
+
+                     bit   :   7       6       5      4      3      2      1      0
+                     name : AISL8   AISL7   AISL6  AISL5  AISL4  AISL3  AISL2  AISL1"
+       ::= { configuration 2 }
+
+
+  confAlarmConfirm OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Confirming (deleting) of existing alarm
+                     1 - Confirming (Deleting) existing device alarm"
+       ::= { configuration 3 }
+
+confTransmitterType OBJECT-TYPE
+       SYNTAX       INTEGER (0..2)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Transmitter type of transmission module
+
+                     0 - laser diode, 
+                     1 - Light Eemittnig Diode
+                     2 - Electrical transmitter type
+                    "
+       ::= { configuration 4 }
+
+   confTransmitterStatus OBJECT-TYPE
+       SYNTAX       INTEGER (0..2)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "Transmitter status: 
+                     0-disabled/automatic, 
+                     1-Full power used, 
+                     2-Low power used"
+       ::= { configuration 5 }
+
+   confProgMAXTemperature OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Maximal acceptable system temperature level
+
+                     (example: 2758 means 27.58 Celcjus degrees)"
+
+       ::= { configuration 6 }
+
+confProgMINTemperature    OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Minimal acceptable system temperature level
+                     (example: 2758 means 27.58 Celcjus degrees)"
+       ::= { configuration 7 }
+
+   confProgMAX3V OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Maximal acceptable voltage 3.3V supply level
+
+                     (example: 327 means 3.27 V)"
+       ::= { configuration 8 }
+
+   confProgMIN3V OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Minimal acceptable voltage 3.3V supply level
+
+                     (example: 327 means 3.27 V)"
+       ::= { configuration 9 }
+
+   confProgMAX5V OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Maximal acceptable voltage 5V supply level
+
+                     (example: 527 means 5.27 V)"
+       ::= { configuration 10 }
+
+   confProgMIN5V OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Minmal acceptable voltage 5V supply level
+
+                     (example: 527 means 5.27 V)"
+       ::= { configuration 11 }
+
+ 
+
+
+
+------------------------------------------------------------------------------
+-- STATUS Group
+--
+--
+
+   statLOES OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The status of tributary signals register
+                     loss of incoming tributary signal ( LOESx=1 loss of the signal, LOESx=0 - signal present, x - tributary channel number)
+
+
+                    bit   :     15        14       13       12       11       10      9      8
+                    name  :   LOES16    LOES15   LOES14   LOES13   LOES12   LOES11  LOES10 LOES9
+
+                    bit   :      7        6        5        4        3        2       1      0
+                    name  :    LOES8    LOES7    LOES6    LOES5    LOES4    LOES3   LOES2  LOES1"
+       ::= { status 1 }
+
+   statAISLM OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The status of AIS local signal register 1-4.
+                     Detecting of incoming AIS sinal in the local device (AISLx=1 the local device is detecting AIS signal
+                     AISLx=0 lack of AIS signal)
+
+                    bit   :   15     14       13      12      11      10      9       8
+                    name  : AISL16 AISL15   AISL14  AISL13  AISL12  AISL11  AISL10  AISL9
+                    
+                    bit   :   7       6        5       4        3        2        1       0
+                    name  : AISL8   AISL7    AISL6   AISL5    AISL4    AISL3    AISL2   AISL1"
+
+       ::= { status 2 }
+
+   statVIOL OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The satate of Violation of Tributary Signal Error register
+                     (VTSEx=1 - Tributary channel x error, VTSEx=0 - lack of error, x - tributary channel number)
+
+                     bit   :   15      14       13      12      11      10      9       8
+                     name  : VTSE16  VTSE15   VTSE14  VTSE13  VTSE12  VTSE11  VTSE10  VTSE9
+
+                     bit   :   7       6        5       4        3        2        1   	  0
+                     name  : VTSE8   VTSE7    VTSE6   VTSE5    VTSE4    VTSE3    VTSE2   VTSE1"
+
+       ::= { status 4 }
+
+   statBZSTAT OBJECT-TYPE
+       SYNTAX       INTEGER (0..255)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The state of Collective Block register BZSTAT is the 8 bit long register:
+                     bit 7: The Status of laser (0 - laser turned off, 1-laser turned on) 
+                     bit 6: VTSE 5B-6B code violation error in collective signal VTSE 
+                     bit 5: ALZUZ- Feedback alarm from the remote device (ALZUZ=1 - device has been recived the feedback alarm signal, ALZUZ=0 - lack of feednack alarm signal).
+                     bit 4: 106K - crossing over of error level (10e-6) in the receiving collective signal. (E10_6=1 - 10e-6 Error level detected, E10_6=0 - lack of 10e-6 error level).
+                     bit 3: 103K - crossing over of error level (10e-3) in the receiving collective signal. (E10_3=1 - 10e-3 Error level detected, E10_3=0 - lack of 10e-3 error level).
+                     bit 2: Loss of frame synchronization (LOF).
+                     bit 1: Lack of transmitter power( 0 - Power is correct, 1 - lack of power)
+                     bit 0: loss of optical signal in the fiber input."
+
+       ::= { status 5 }
+
+   statSUS OBJECT-TYPE
+       SYNTAX       INTEGER (0..255)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The status of Signalization Circuit Status register
+                     Signalization circuit status register bits description:
+                     bit 0: DALP  - Urgent alarm signalization bit or loss of urgent alarm after the confirming 
+                       bit 1: DPALP - recall urgent alarm bit
+                       bit 2: PALP  - switch on the relay of urgent alarm bit
+                       bit 3: DALN  - not urgent alarm signalization bit or loss of not urgent alarm after the confirming
+                       bit 4: DPALN - recall not urgent alarm bit
+                       bit 5: PALN  - switch on the relay of not urgent alarm bit"
+
+       ::= { status 6 }
+
+   statKJT OBJECT-TYPE
+       SYNTAX       INTEGER (0..255)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The status of Transmition Quality Control register
+                     Bits description:
+                     bit 7: PSES24O - crossing the treshold for 24 hour SES register for input channel 
+                                      Wyst¹pienie przekroczenia wartoœci progowej dla rejestru SES,24 godzinnego, dla kierunku odbiorczego 
+                     bit 6: PSES24N - crossing the treshold for 24 hour SES register for output channel 
+                                       (PSES24N=1 - threshold has been crossed over PSES24N=0 - threshold has not been crossed over)
+                     bit 5: PES24O  - crossing the treshold for 24 hour ES register for input channel 
+                                      (PES24O=1 - threshold has been crossed over PES24O=0 - threshold has not been crossed over)
+                     bit 4: PES24N  - crossing the treshold for 24 hour ES register for output channel 
+                                      (PES24N=1 - threshold has been crossed over PES24N=0 - threshold has not been crossed over)
+                     bit 3: PSES15O - crossing the treshold for 15 minutes SES register for input channel 
+                                      (PSES15O=1 - threshold has been crossed over PSES15O=0 - threshold has not been crossed over)
+                     bit 2: PSES15N - crossing the treshold for 15 minutes SES register for output channel 
+                                      (PSES15N=1 - threshold has been crossed over PSES15N=0 - threshold has not been crossed over)
+                     bit 1: PES15O  - crossing the treshold for 15 minutes ES register for input channel 
+                                      (PES15O=1 - threshold has been crossed over PES15O=0 - threshold has not been crossed over)
+                     bit 0: PES15N  - crossing the treshold for 15 minutes ES register for output channel 
+                                      (PES15N=1 - threshold has been crossed over PES15N=0 - threshold has not been crossed over)"
+
+
+       ::= { status 7 }
+
+   statTemperature OBJECT-TYPE
+       SYNTAX       Hundredths 
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Surrounding system environment temperature
+                     (example: 2758 means 27.58 degrees of Celsjus)"
+       ::= { status 8 }
+
+stat3VVoltage OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Supply Voltage level (3.3V)
+                     (example: 327 means 3.27 V )"
+       ::= { status 9 }
+
+stat5VVoltage OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Supply Voltage level (5V)
+                     (example: 527 means 5.27 V )"
+       ::= { status 10 }
+
+statExtremLevel OBJECT-TYPE
+       SYNTAX       INTEGER (0..255)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "The state of power supply voltages and environment temperature
+                      (1 - value above threshold, 0 - value below treshold)
+
+                      bit 0: - 3.3V voltage 
+                      bit 1: – 5V voltage
+                      bit 7: – environmrnt temperature"
+       ::= { status 13 }
+
+   statLOOSmask OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Tributary Signals Mask register (1-16)"
+       ::= { status 14 }
+
+   statBZSTATmask OBJECT-TYPE
+       SYNTAX       INTEGER (0..255)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Collective Block Status Mask register"
+       ::= { status 15 }
+
+
+   statAISE3 OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "AIS signal in the E3 module"
+       ::= { status 16 }
+
+------------------------------------------------------------------------------
+-- EVENTLOG Group
+--
+--
+
+logIndexLastEvent OBJECT-TYPE
+    SYNTAX	INTEGER (-1..1999)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "Newest written event index
+             Indeks do ostatnio wpisanego zdarzenia w historii dziennika zdarzen
+             -1 means empty log"
+    ::= { EventLog 1 }
+
+logErase OBJECT-TYPE
+    SYNTAX  	INTEGER {
+			  kasowanie(1)
+			}
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	"erasing of event log 1 - means erasing the log"    
+    ::= { EventLog 2 }
+
+logTable OBJECT-TYPE
+    SYNTAX  SEQUENCE OF LogEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table defines the event log"
+
+    ::= { EventLog 3 }
+
+logEntry OBJECT-TYPE
+    SYNTAX	LogEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { dzIndex }
+    ::= { logTable 1 }
+
+logEntry ::= SEQUENCE {
+	 logIndex			INTEGER (0..1999),
+	 logEventDescription	DisplayString (SIZE (0..23))
+	    }
+
+logIndex OBJECT-TYPE
+       SYNTAX       INTEGER (0..1999)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "event index"
+       ::= { logEntry 1 }
+
+logEventDescription OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..23))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Event description:
+             YYYY/MM/DD HH:MM.SS ZZZ
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 SS   - second
+		 ZZZ  - event identifier
+            "
+    ::= { logEntry 2 }
+
+
+------------------------------------------------------------------------------
+-- SES Group
+--
+--
+
+esLastES15T OBJECT-TYPE
+    SYNTAX	INTEGER (0..15)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written ES15T counters table register"
+    ::= { es 1 }
+
+esLastES15R OBJECT-TYPE
+    SYNTAX	INTEGER (0..15)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    	    "index of the newest written ES15R counters table register"
+    ::= { es 2 }
+
+esLastSES15T OBJECT-TYPE
+    SYNTAX	INTEGER (0..15)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written SES15T counters table register"
+    ::= { es 3 }
+
+esLastSES15R OBJECT-TYPE
+    SYNTAX	INTEGER (0..15)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written SES15R counters table register"
+    ::= { es 4 }
+
+esLastES24T OBJECT-TYPE
+    SYNTAX	INTEGER (0..1)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written ES24T counters table register"
+    ::= { es 5 }
+
+esLastES24R OBJECT-TYPE
+    SYNTAX	INTEGER (0..1)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written ES24R counters table register"
+    ::= { es 6 }
+
+esLastSES24T OBJECT-TYPE
+    SYNTAX	INTEGER (0..1)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written SES24T counters table register"
+    ::= { es 7 }
+
+esLastSES24R OBJECT-TYPE
+    SYNTAX	INTEGER (0..1)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	    "index of the newest written SES24R counters table register"
+
+    ::= { es 8 }
+
+esErase OBJECT-TYPE
+    SYNTAX	INTEGER {
+			 kasowanie(1)
+			}
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	  "Erasing the ES/SES counters table registers 1 - erasing"
+    ::= { es 9 }
+
+esESAlarm OBJECT-TYPE
+    SYNTAX	INTEGER (0..1)
+    MAX-ACCESS	read-write
+    STATUS	current 
+    DESCRIPTION	   "Activation of the crosing treshold alarm 
+                    0 – alarm inactive
+                    1 – alarm active"
+    ::= { es 10 }
+
+  esES15On OBJECT-TYPE
+       SYNTAX       INTEGER (0..900)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the not urgent alarm in the range of 15 min. (0-900)"
+       ::= { es 11 }
+
+   esES15Off OBJECT-TYPE
+       SYNTAX       INTEGER (0..900)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching off not urgent alarm in the range of 15 min (0-900)"
+       ::= { es 12 }
+
+   esSES15On OBJECT-TYPE
+       SYNTAX       INTEGER (0..900)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching on urgent alarm in the range of 15 min (0-900)"
+       ::= { es 13 }
+
+   esSES15Off OBJECT-TYPE
+       SYNTAX       INTEGER (0..900)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching off urgent alarm in the range of 15 min (0-900)"
+       ::= { es 14 }
+
+   esES24On OBJECT-TYPE
+       SYNTAX       INTEGER (0..86400)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching on not urgent alarm in the range of 24h (0-86400)"
+       ::= { es 15 }
+
+   esES24Off OBJECT-TYPE
+       SYNTAX       INTEGER (0..86400)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching off not urgent alarm in the range of 24 h. (0-86400)"
+       ::= { es 16 }
+
+   esSES24On OBJECT-TYPE
+       SYNTAX       INTEGER (0..86400)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching on urgent alarm in the range of 24 h. (0-86400)"
+       ::= { es 17 }
+
+   esSES24Off OBJECT-TYPE
+       SYNTAX       INTEGER (0..86400)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "treshold of the switching off urgent alarm in the range of 24 h. (0-86400)"
+      ::= { es 18 }
+
+  esESSESHour OBJECT-TYPE
+       SYNTAX       INTEGER (0..23)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "hour of the beginning of counting in the ES/SES registers"
+       ::= { es 19 }
+
+   esESSESMinute OBJECT-TYPE
+       SYNTAX       INTEGER (0..59)
+       MAX-ACCESS   read-write
+       STATUS       current
+       DESCRIPTION  "minute of the beginning of counting in the ES/SES registers"
+       ::= { es 20 }
+
+---------------
+-- Table ES15N
+---------------
+
+esTableES15T OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntryES15N
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  ES15T registers"
+    ::= { es 21 }
+
+esEntryES15T OBJECT-TYPE
+    SYNTAX	EsEntryES15N
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION	    ""
+    INDEX   { esIndexES15T }
+    ::= { esTableES15T 1 }
+
+
+EsEntryES15N ::= SEQUENCE {
+	 esIndexES15T			INTEGER (0..16),
+	 esOpisEventDescriptionES15T	DisplayString (SIZE (0..22))
+    }
+
+esIndexES15T OBJECT-TYPE
+       SYNTAX       INTEGER (0..16)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntryES15T 1 }
+
+esEventDescriptionES15T OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..22))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+             "Description:
+             YYYY/MM/DD HH:MM LLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLL  - counter of errored seconds"
+               ::= { esEntryES15T 2 }
+
+---------------
+-- Table ES15R
+---------------
+
+esTableES15R OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntryES15R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  ES15R registers"
+    ::= { es 22 }
+
+esEntryES15R OBJECT-TYPE
+    SYNTAX	EsEntryES15R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexES15R }
+    ::= { esTableES15R 1 }
+
+
+EsEntryES15R ::= SEQUENCE {
+	 esIndexES15R		INTEGER (0..16),
+	 esEventDescriptionES15R	DisplayString (SIZE (0..22))
+    }
+
+esIndexES15R OBJECT-TYPE
+       SYNTAX       INTEGER (0..16)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntryES15R 1 }
+
+esEventDescriptionES15R OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..22))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+             "Description:
+             YYYY/MM/DD HH:MM LLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLL  - errored secons counter"
+    ::= { esEntryES15R 2 }
+
+---------------
+-- Table SES15T
+---------------
+
+esTableSES15T OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntrySES15T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  SES15T registers"
+    ::= { es 23 }
+
+esEntrySES15T OBJECT-TYPE
+    SYNTAX	EsEntrySES15T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexSES15T }
+    ::= { esTableSES15T 1 }
+
+
+EsEntrySES15T ::= SEQUENCE {
+	 esIndexSES15T		INTEGER (0..16),
+	 esEventDescriptionSES15T	DisplayString (SIZE (0..22))
+    }
+
+esIndexSES15T OBJECT-TYPE
+       SYNTAX       INTEGER (0..16)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntrySES15T 1 }
+
+esEventDescriptionSES15T OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..22))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLL  - errored seconds counter
+        "
+    ::= { esEntrySES15T 2 }
+
+---------------
+-- Table SES15R
+---------------
+
+esTableSES15R OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntrySES15R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  SES15R registers"
+
+    ::= { es 24 }
+
+esEntrySES15R OBJECT-TYPE
+    SYNTAX	EsEntrySES15R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexSES15R }
+    ::= { esTableSES15R 1 }
+
+
+EsEntrySES15R ::= SEQUENCE {
+	 esIndexSES15R			INTEGER (0..16),
+	 esEventDescriptionSES15R	DisplayString (SIZE (0..22))
+    }
+
+esIndexSES15R OBJECT-TYPE
+       SYNTAX       INTEGER (0..16)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntrySES15R 1 }
+
+esEventDescriptionSES15R OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..22))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLL  - errored seconds counter
+        "
+    ::= { esEntrySES15R 2 }
+
+---------------
+-- Table ES24T
+---------------
+
+esTableES24T OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntryES24T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  ES24T registers"
+    ::= { es 25 }
+
+esEntryES24T OBJECT-TYPE
+    SYNTAX	EsEntryES24T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexES24T }
+    ::= { esTableES24T 1 }
+
+
+EsEntryES24T ::= SEQUENCE {
+	 esIndexES24T			INTEGER (0..1),
+	 esEventDescriptionES24T	DisplayString (SIZE (0..24))
+    }
+
+esIndexES24T OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntryES24T 1 }
+
+esEventDescriptionES24T OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..24))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLLLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLLLL- errored second counter 
+        "
+    ::= { esEntryES24T 2 }
+
+---------------
+-- Table ES24R
+---------------
+
+esTableES24R OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntryES24R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  ES24R registers"
+
+    ::= { es 26 }
+
+esEntryES24R OBJECT-TYPE
+    SYNTAX	EsEntryES24R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexES24R }
+    ::= { esTableES24R 1 }
+
+
+EsEntryES24R ::= SEQUENCE {
+	 esIndexES24R			INTEGER (0..1),
+	 esEventDescriptionES24R	DisplayString (SIZE (0..24))
+    }
+
+esIndexES24R OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntryES24R 1 }
+
+esEventDescriptionES24R OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..24))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLLLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLLLL- errored seconds counter
+        "
+    ::= { esEntryES24R 2 }
+
+---------------
+-- Table SES24T
+---------------
+
+esTableSES24T OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntrySES24T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  SES24T registers"
+    ::= { es 27 }
+
+esEntrySES24T OBJECT-TYPE
+    SYNTAX	EsEntrySES24T
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexSES24T }
+    ::= { esTableSES24T 1 }
+
+
+EsEntrySES24T ::= SEQUENCE {
+	 esIndexSES24T			INTEGER (0..1),
+	 esEventDescriptionSES24T	DisplayString (SIZE (0..24))
+    }
+
+esIndexSES24T OBJECT-TYPE
+       SYNTAX       INTEGER (0..11)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntrySES24T 1 }
+
+esEventDescriptionSES24T OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..24))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLLLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLLLL- errored seconds counter 
+        "
+    ::= { esEntrySES24T 2 }
+
+
+---------------
+-- Table SES24R
+---------------
+
+esTableSES24R OBJECT-TYPE
+    SYNTAX  SEQUENCE OF EsEntrySES24R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    "This table describes the values of  SES24R registers"
+    ::= { es 28 }
+
+esEntrySES24R OBJECT-TYPE
+    SYNTAX	EsEntrySES24R
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	    ""
+    INDEX   { esIndexSES24R }
+    ::= { esTableSES24R 1 }
+
+
+EsEntrySES24R ::= SEQUENCE {
+	 esIndexSES24R			INTEGER (0..1),
+	 esEventDescriptionSES24R	DisplayString (SIZE (0..24))
+    }
+
+esIndexSES24R OBJECT-TYPE
+       SYNTAX       INTEGER (0..1)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Index"
+       ::= { esEntrySES24R 1 }
+
+esEventDescriptionSES24R OBJECT-TYPE
+    SYNTAX  	DisplayString (SIZE (0..24))
+    MAX-ACCESS  read-only
+    STATUS  	current
+    DESCRIPTION
+	    "Description:
+             YYYY/MM/DD HH:MM LLLLL A
+		 YYYY - year
+		 MM   - month
+		 DD   - day
+		 HH   - hour
+		 MM   - minute
+		 LLLLL- errored seconds counter
+        "
+    ::= { esEntrySES24R 2 }
+
+
+------------------------------------------------------------------------------
+-- TEST Group
+--
+-- 
+
+testTributaryChannelLoopType1 	OBJECT-TYPE
+	    SYNTAX  INTEGER (0..65535)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Switching on the local/to interface/type 1 digital loops in the tributary channel 1 - 16
+                 (ALx = 1 loop switched on, ALx = 0 loop switched off)
+
+                    bit   :   15     14       13      12      11      10      9       8
+                    name  :  AL16   AL15     AL14    AL13    AL12    AL11    AL10    AL9
+                    
+                    bit   :   7       6        5       4        3        2        1   	  0
+                    name  :  AL8     AL7      AL6     AL5      AL4      AL3      AL2     AL1"
+
+	    ::= {test 1}
+	    
+testTributaryChannelLoopType2			OBJECT-TYPE
+	    SYNTAX  INTEGER (0..65535)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	 "Switching on the remote/from interface/type 2 loops in the tributary channel 1 - 4
+                 (RLx = 1 loop switched on, ALx = 0 loop switched off)
+
+                    bit   :   15     14       13      12      11      10      9       8
+                    name  :  RL16   RL15     RL14    RL13    RL12    RL11    RL10    RL9
+                    
+                    bit   :   7       6        5       4        3        2        1   	  0
+                    name  :  RL8     RL7      RL6     RL5      RL4      RL3      RL2     RL1"
+	    ::= {test 2}
+
+testMainChannelLoopType1				OBJECT-TYPE
+	    SYNTAX  INTEGER (0..1)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Switching on the local/to interface/ type1 digital loops in the collective channel"
+	    ::= {test 3}
+
+testMainChannelLoopType2			OBJECT-TYPE
+	    SYNTAX  INTEGER (0..1)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+               "Switching on the remote/from interface/type 2 digital loops in the collective channel"
+	    ::= {test 4}
+
+
+
+	testGeneratorDetector		OBJECT-TYPE
+	    SYNTAX  INTEGER (0..17)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Number of generator/detector used to test.
+                1..16 - generator is in the tributary channel direection
+                17 - generator is in the collective channel direction"
+	    ::= {test 5}
+
+	testGCT				OBJECT-TYPE
+	    SYNTAX  INTEGER (0..1)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+                "switching  on/off control of the test generators for choosen tributary channels
+                 1 – generator switched on za³¹czony
+                 0 – generator switched off wy³¹czony"
+
+	    ::= {test 6}
+
+       testTime		OBJECT-TYPE
+	    SYNTAX  INTEGER (0..86400)
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Declared test time in seconds Max. 24 hours"
+	    ::= {test 7}
+
+	testSyncTime		OBJECT-TYPE
+	    SYNTAX  INTEGER (0..86400)
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"time of measurement when the synchronization exists"
+	    ::= {test 8}
+
+	testNoSyncTime		OBJECT-TYPE
+	    SYNTAX  INTEGER (0..86400) 
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"time of measurement when there is no synchronization"
+
+	    ::= {test 9}
+
+	testErrorsPerSec		OBJECT-TYPE
+	    SYNTAX  Integer32 
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"current errors number per second"
+	    ::= {test 10}
+
+	testTotalErrorNumber		OBJECT-TYPE
+	    SYNTAX  Integer32
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"total error number"
+	    ::= {test 11}
+
+	testBER		OBJECT-TYPE
+	    SYNTAX  DisplayString (SIZE(0..7)) 
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Error level in scietific notation
+                 example: 2.3e-9"
+	    ::= {test 12}
+
+	testErrorsPerSecBWSZ		OBJECT-TYPE
+	    SYNTAX  Integer32 
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"Current Error number of BWSZ per second"
+	    ::= {test 13}
+
+	testTotalErrorNumberBWSZ		OBJECT-TYPE
+	    SYNTAX  Integer32 
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"Total number of BWSZ errors"
+	    ::= {test 14}
+
+
+
+	testBERBWSZ		OBJECT-TYPE
+	    SYNTAX  DisplayString (SIZE(0..7)) 
+	    MAX-ACCESS  read-write
+	    STATUS  current
+	    DESCRIPTION
+	    	"Error level of BWSZ in scietific notation
+                 example: 2.3e-9"	    	
+            ::= {test 15}
+
+
+
+	testSyncYesNo		OBJECT-TYPE
+	    SYNTAX  INTEGER
+	    { 
+	      NoSync(0),
+	      SyncPresent(1)
+	    }
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"Synchronization flag ( 1 - means test sequence detection )"
+	    ::= {test 16}
+
+	testStatus			OBJECT-TYPE
+	    SYNTAX  INTEGER (0..6)
+	    MAX-ACCESS  read-only
+	    STATUS  current
+	    DESCRIPTION
+	    	"Current test status
+                 0 – OFF  – test switched off
+                 1 – ON   – test switched on
+                 2 – RUN – test goes on
+                 3 – READY – Ready to start test 
+                 4 – WAIT_ON – waiting to switch on the test
+                 5 – WAIT_OFF – waiting to switch off the test
+                 6 – WAIT – waiting"
+
+	    ::= {test 17}
+
+------------------------------------------------------------------------------
+-- TRAPs Group
+--
+-- 
+
+OptiLine16MIBNotifications               	 OBJECT IDENTIFIER ::= { OptiLine16 7 }
+--MibNotificationsPrefix               OBJECT IDENTIFIER ::= { MibNotifications 0 }
+MibNotificationsPrefix               OBJECT IDENTIFIER ::= { OptiLine16MIBNotifications 0 }
+OptiLine16MIBObjects               		 OBJECT IDENTIFIER ::= { OptiLine16MIBNotifications 1 }
+
+
+obEventIdn OBJECT-TYPE
+       SYNTAX       INTEGER (0..65535)
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "Number of event"
+       ::= { OptiLine16MIBObjects 1 }
+
+obEventDescription OBJECT-TYPE
+       SYNTAX       DisplayString (SIZE (0..60))
+       MAX-ACCESS   read-only
+       STATUS       current
+       DESCRIPTION  "event description"
+       ::= { OptiLine16MIBObjects 2 }
+
+
+   trapOptiLine16ALPActive NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "urgent alarm is active"
+
+       	--#TYPE "Urgent alarm is active"
+	--#SUMMARY "Urgent alarm is active"
+	--#SEVERITY CRITICAL
+	--#TIMEINDEX 1
+	--#HELP "lanexalarm.hlp"
+	--#HELPTAG 1
+	--#STATE  DEGRADED
+	--#CATEGORY "Status Events"
+       ::= { OptiLine16MIBNotifications 0 1 }
+
+   trapOptiLine16ALNActive NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "Not urgent alarm is active"
+       	--#TYPE "Not urgent alarm is active"
+	--#SUMMARY "Not urgent alarm is active"
+	--#SEVERITY MINOR
+	--#TIMEINDEX 1
+	--#HELP "lanexalarm.hlp"
+	--#HELPTAG 1
+	--#STATE  DEGRADED
+	--#CATEGORY "Status Events"
+       ::= { OptiLine16MIBNotifications 0 2 }
+
+  trapOptiLine16LogIdn NOTIFICATION-TYPE
+	OBJECTS {
+		   obEventIdn, --identyfikator zdarzenia
+		   obEventDescription 
+
+		}
+       STATUS  current
+       DESCRIPTION "Occurence of event in the device:
+                    1.record of the event to local log
+                    2.passing event identifier in the trap message"
+      	--#TYPE "Memory: Occurence of event in the device"
+	--#SUMMARY "Event id %d: %s"
+	--#ARGUMENTS {0,1}
+	--#CATEGORY "Status Events"
+	--#SEVERITY NORMAL
+	--#TIMEINDEX 1
+	--#HELP "lanexalarm.hlp"
+	--#HELPTAG 1
+	--#STATE  DEGRADED
+       ::= { OptiLine16MIBNotifications 0 3 }
+
+  trapOptiLine16Es NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "The change in the es/ses registers"
+       ::= { OptiLine16MIBNotifications 0 4 }
+
+ trapOptiLine16confn NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "Configuration change (record of the Configuration member variable)
+                    n - element identifier, which has been modified"
+       ::= { OptiLine16MIBNotifications 0 5 }
+
+  trapOptiLine16ALPInactive NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "urgent alarm inactive"
+       	--#TYPE "Urgent alarm inactive"
+	--#SUMMARY "urgent alarm inactive"
+	--#SEVERITY NORMAL
+	--#TIMEINDEX 1
+	--#HELP "nwalarm.hlp"
+	--#HELPTAG 1
+	--#STATE  DEGRADED
+	--#CATEGORY "Status Events"
+
+       ::= { OptiLine16MIBNotifications 0 6 }
+
+   trapOptiLine16ALNInactive NOTIFICATION-TYPE
+       STATUS  current
+       DESCRIPTION "Not urgent alarm inactive"
+       	--#TYPE "Not urgent alarm inactive"
+	--#SUMMARY "Not urgent alarm inactive"
+	--#SEVERITY NORMAL
+	--#TIMEINDEX 1
+	--#HELP "lanexalarm.hlp"
+	--#HELPTAG 1
+	--#STATE  DEGRADED
+	--#CATEGORY "Status Events"
+
+       ::= { OptiLine16MIBNotifications 0 7 }
+
+END

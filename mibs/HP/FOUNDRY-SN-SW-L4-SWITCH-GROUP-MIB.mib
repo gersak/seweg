@@ -1,0 +1,4650 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Courier New;}{\f1\fswiss\fcharset0 Arial;}}
+{\*\generator Msftedit 5.41.15.1515;}\viewkind4\uc1\pard\f0\fs20 FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB DEFINITIONS ::= BEGIN\par
+\par
+IMPORTS\par
+\tab MODULE-IDENTITY, OBJECT-TYPE,IpAddress, Counter32, TimeTicks,Counter64,Integer32\par
+\tab\tab\tab FROM SNMPv2-SMI\par
+\tab\tab\tab\par
+\tab switch\par
+\tab\tab FROM FOUNDRY-SN-ROOT-MIB\par
+\tab\tab\tab\par
+\tab TEXTUAL-CONVENTION\par
+\tab\tab FROM SNMPv2-TC\par
+\tab\tab\tab\par
+\tab PhysAddress\par
+\tab\tab FROM FOUNDRY-SN-SWITCH-GROUP-MIB\par
+\tab\par
+\tab DisplayString\par
+\tab\tab FROM FOUNDRY-SN-AGENT-MIB;\par
+\tab\tab\tab\par
+snL4 MODULE-IDENTITY\par
+\tab LAST-UPDATED "200909300000Z" -- September 30, 2009\par
+\tab ORGANIZATION "Foundry Networks, Inc"\par
+\tab CONTACT-INFO\par
+\tab\tab\tab "\par
+\tab\tab\tab Technical Support Center, Foundry Networks,\par
+\tab\tab\tab 4980 Great America Parkway,\par
+\tab\tab\tab Santa Clara, CA 95054\par
+\tab\tab\tab Email: support@foundrynet.com\par
+\tab\tab\tab Phone: 1-877-TURBO-CALL\par
+\tab\tab\tab "\par
+\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab Copyright 1996-2008 Foundry Networks, Inc.\par
+\tab\tab\tab All rights reserved.\par
+\tab\tab\tab This Foundry Networks SNMP Management Information Base Specification\par
+\tab\tab\tab embodies Foundry Networks' confidential and proprietary\par
+\tab\tab\tab intellectual property. Foundry Networks retains all\par
+\tab\tab\tab title and ownership in the Specification, including any\par
+\tab\tab\tab revisions.\par
+\tab\tab\tab\par
+\tab\tab\tab This Specification is supplied AS IS, and Foundry Networks makes\par
+\tab\tab\tab no warranty, either express or implied, as to the use,\par
+\tab\tab\tab operation, condition, or performance of the Specification.\tab\tab\tab\par
+\tab\tab\tab "        \par
+\tab REVISION     "200909300000Z" -- September 30, 2009\par
+\tab DESCRIPTION\par
+\tab\tab\tab "convert from SMIv1 to SMIv2"\par
+   ::= \{ switch 4\}\par
+\par
+\tab -- textual conventions\par
+\par
+\tab L4RowSts ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab Row Creation/Deletion Values\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab INTEGER \{\tab other(1),\par
+\tab\tab\tab\tab\tab\tab\tab valid(2),\par
+\tab\tab\tab\tab\tab\tab\tab delete(3),\par
+\tab\tab\tab\tab\tab\tab\tab create(4),\par
+\tab\tab\tab\tab\tab\tab\tab modify(5)\par
+\tab\tab\tab\tab\tab\tab\}\tab\tab\par
+\par
+\tab L4Status ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab L4 Status Values\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab INTEGER \{ disabled(0), enabled(1) \}\par
+\par
+\tab L4ServerName ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab L4 Server Name\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab OCTET STRING (SIZE(1..32))\par
+\tab\tab\par
+\tab L4Flag ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab\tab L4 Flag Values\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab INTEGER \{ false(0), true(1) \}\par
+\par
+\tab L4DeleteState ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab L4 Delete Sate\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab INTEGER \{\tab done(0),\par
+\tab\tab\tab\tab\tab\tab\tab waitunbind(1),\par
+\tab\tab\tab\tab\tab\tab\tab waitdelete(2)\par
+\tab\tab\tab\tab\tab\tab\}\par
+\par
+\tab WebCacheState ::= TEXTUAL-CONVENTION\par
+\tab\tab STATUS\tab   current\par
+\tab\tab DESCRIPTION\par
+\tab\tab\tab "\par
+\tab\tab\tab WebCacheSate\par
+\tab\tab\tab "\par
+\tab\tab SYNTAX\tab INTEGER \{\tab disabled(0),\par
+\tab\tab\tab\tab\tab\tab\tab enabled(1),\par
+\tab\tab\tab\tab\tab\tab\tab failed(2),\par
+\tab\tab\tab\tab\tab\tab\tab testing(3),\par
+\tab\tab\tab\tab\tab\tab\tab suspect(4),\par
+\tab\tab\tab\tab\tab\tab\tab shutdown(5),\par
+\tab\tab\tab\tab\tab\tab\tab active(6)\par
+\tab\tab\tab\tab\tab\tab\tab\}\par
+\par
+\par
+\par
+snL4Gen\tab\tab\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 1  \}\par
+snL4VirtualServer\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 2  \}\par
+snL4RealServer\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 3  \}\par
+snL4VirtualServerPort\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 4  \}\par
+snL4RealServerPort\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 5  \}\par
+snL4Bind\tab\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 6  \}\par
+snL4VirtualServerStatus\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 7  \}\par
+snL4RealServerStatus\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 8  \}\par
+snL4VirtualServerPortStatus\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 9  \}\par
+snL4RealServerPortStatus\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 10 \}\par
+snL4Policy\tab\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 11 \}\par
+snL4PolicyPortAccess\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 12 \}\par
+snL4Trap\tab\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 13 \}\par
+snL4WebCache\tab\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 14 \}\par
+snL4WebCacheGroup\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 15 \}\par
+snL4WebCacheTrafficStats\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 16 \}\par
+snL4WebUncachedTrafficStats\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 17 \}\par
+snL4WebCachePort\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 18 \}\par
+snL4RealServerCfg\tab\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 19 \}\par
+snL4RealServerPortCfg\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 20 \}\par
+snL4VirtualServerCfg\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 21  \}\par
+snL4VirtualServerPortCfg\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 22  \}\par
+snL4RealServerStatistic\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 23 \}\par
+snL4RealServerPortStatistic\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 24 \}\par
+snL4VirtualServerStatistic\tab\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 25 \}\par
+snL4VirtualServerPortStatistic\tab OBJECT IDENTIFIER\tab   ::= \{ snL4 26 \}\par
+snL4GslbSiteRemoteServerIrons\tab OBJECT IDENTIFIER \tab   ::= \{ snL4 27 \}\par
+snL4History\tab\tab\tab\tab\tab\tab OBJECT IDENTIFIER \tab   ::= \{ snL4 28 \}\par
+\par
+\par
+-- L4 General MIBs\par
+\tab\tab\tab\tab\par
+snL4MaxSessionLimit \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab (0..1000000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "numbers of maximum session (L4 cache) entries"\par
+\tab ::= \{ snL4Gen 1 \}\par
+\par
+snL4TcpSynLimit \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (1..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Numbers of connection per second"\par
+\tab ::= \{ snL4Gen 2 \}\par
+\par
+--  Server load balancing\par
+snL4slbGlobalSDAType\tab OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab leastconnection(1),\par
+\tab\tab roundrobin(2),\par
+\tab\tab weighted(3)\par
+\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Global Session Distribution Algorithm(SDA)"\par
+\tab ::= \{ snL4Gen 3 \}\par
+\par
+snL4slbTotalConnections \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Total connections in this device"\par
+\tab ::= \{ snL4Gen 4 \}\par
+\par
+snL4slbLimitExceeds \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "exceeds snL4TCPSynLimit (numbers of connection per second)"\par
+\tab ::= \{ snL4Gen 5 \}\par
+\par
+-- Server load balancing traffic info\par
+\par
+snL4slbForwardTraffic \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Client->Server"\par
+\tab ::= \{ snL4Gen 6 \}\par
+\par
+snL4slbReverseTraffic \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Server->Client"\par
+\tab ::= \{ snL4Gen 7 \}\par
+\par
+snL4slbDrops \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 8 \}\par
+\par
+snL4slbDangling \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 9 \}\par
+\par
+snL4slbDisableCount \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 10 \}\par
+\par
+snL4slbAged \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 11 \}\par
+\par
+snL4slbFinished \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "FIN_or_RST"\par
+\tab ::= \{ snL4Gen 12 \}\par
+\par
+--  Session\par
+\par
+snL4FreeSessionCount \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Maximum sessions - used sessions"\par
+\tab ::= \{ snL4Gen 13 \}\par
+\par
+\par
+--  Hot stand-by\par
+snL4BackupInterface \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab   (0..26)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "backup monitoring port"\par
+\tab ::= \{ snL4Gen 14 \}\par
+\par
+snL4BackupMacAddr \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab PhysAddress\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Associated MAC address for backup monitoring port"\par
+\tab ::= \{ snL4Gen 15 \}\par
+\par
+snL4Active \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Flag\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 16 \}\par
+\par
+snL4Redundancy \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 17 \}\par
+\par
+snL4Backup \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Flag\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "true->StandBy,false->active"\par
+\tab ::= \{ snL4Gen 18 \}\par
+\par
+snL4BecomeActive \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "How many times this device become active"\par
+\tab ::= \{ snL4Gen 19 \}\par
+\par
+snL4BecomeStandBy \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "How many times this device become standby"\par
+\tab ::= \{ snL4Gen 20 \}\par
+\par
+snL4BackupState \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab slbSyncComplete(0),\par
+\tab\tab slbSyncReqMap(1),\par
+\tab\tab slbSyncreqMac(2),\par
+\tab\tab slbSyncreqServers(3),\par
+\tab\tab slbSyncReqL4(4)\par
+\tab\}\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Backup state"\par
+\tab ::= \{ snL4Gen 21 \}\par
+\par
+snL4NoPDUSent \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 22 \}\par
+\par
+\par
+snL4NoPDUCount \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 23 \}\par
+\par
+\par
+snL4NoPortMap \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4Gen 24 \}\par
+\par
+snL4unsuccessfulConn \tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Unsuccessfull connection"\par
+\tab ::= \{ snL4Gen 25 \}\par
+\par
+snL4PingInterval \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (1..10)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Ping retries interval"\par
+\tab DEFVAL \{ 2 \}\par
+\tab ::= \{ snL4Gen 26 \}\par
+\par
+snL4PingRetry \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab (2..10)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Ping retries attempts"\par
+\tab DEFVAL \{ 4 \}\par
+\tab ::= \{ snL4Gen 27 \}\par
+\par
+snL4TcpAge \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab (2..60)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "TCP reset age"\par
+\tab DEFVAL \{ 30 \}\par
+\tab ::= \{ snL4Gen 28 \}\par
+\par
+\par
+snL4UdpAge \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab (2..60)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "UDP reset age"\par
+\tab DEFVAL \{ 5 \}\par
+\tab ::= \{ snL4Gen 29 \}\par
+\par
+\par
+-- Enable/disable L4 traps\par
+\par
+snL4EnableMaxSessionLimitReachedTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable maximum number of connections reached trap."\par
+\tab ::= \{ snL4Gen 30 \}\par
+\par
+snL4EnableTcpSynLimitReachedTrap            OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the number of TCP SYN limits reached trap."\par
+\tab ::= \{ snL4Gen 31 \}\par
+\par
+snL4EnableRealServerUpTrap                  OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the real server up trap."\par
+\tab ::= \{ snL4Gen 32 \}\par
+\par
+snL4EnableRealServerDownTrap                OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the real server down trap."\par
+\tab ::= \{ snL4Gen 33 \}\par
+\par
+snL4EnableRealServerPortUpTrap              OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the real server TCP port up trap."\par
+\tab ::= \{ snL4Gen 34 \}\par
+\par
+snL4EnableRealServerPortDownTrap            OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the real server TCP port down trap."\par
+\tab ::= \{ snL4Gen 35 \}\par
+\par
+snL4EnableRealServerMaxConnLimitReachedTrap OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable the real server maximum number of\par
+\tab\tab connections reached trap."\par
+\tab ::= \{ snL4Gen 36 \}\par
+\par
+snL4EnableBecomeStandbyTrap                 OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable trap of the server load balancing\par
+\tab\tab switch changes state from active to standby."\par
+\tab ::= \{ snL4Gen 37 \}\par
+\par
+snL4EnableBecomeActiveTrap                  OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Enable/disable trap of the server load balancing\par
+\tab\tab switch changes state from standby to active."\par
+\tab ::= \{ snL4Gen 38 \}\par
+\par
+snL4slbRouterInterfacePortMask \tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  deprecated\par
+\tab DESCRIPTION\par
+\tab\tab "Router interface port mask.\par
+\tab\tab (It was obsoleted after release 07100, replaced by snL4slbRouterInterfacePortList)"\par
+\tab ::= \{ snL4Gen 39 \}\par
+\par
+------- Server Cache Group Global MIBs ----------\par
+snL4MaxNumWebCacheGroup \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The maximum number of server cache groups"\par
+\tab ::= \{ snL4Gen 40 \}\par
+\par
+snL4MaxNumWebCachePerGroup \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The maximum number of WEB Cache servers in each of web cache group"\par
+\tab ::= \{ snL4Gen 41 \}\par
+\par
+snL4WebCacheStateful \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The WEB Cache servers cache-stateful"\par
+\tab ::= \{ snL4Gen 42 \}\par
+\par
+------- GSLB Group Global MIBs ----------\par
+snL4EnableGslbHealthCheckIpUpTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Health check IP up."\par
+\tab ::= \{ snL4Gen 43 \}\par
+\par
+snL4EnableGslbHealthCheckIpDownTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Health check IP down."\par
+\tab ::= \{ snL4Gen 44 \}\par
+\par
+\par
+snL4EnableGslbHealthCheckIpPortUpTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Health check IP port up."\par
+\tab ::= \{ snL4Gen 45 \}\par
+\par
+\par
+snL4EnableGslbHealthCheckIpPortDownTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Health check IP port down."\par
+\tab ::= \{ snL4Gen 46 \}\par
+\par
+\par
+snL4EnableGslbRemoteGslbSiDownTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Connection to GSLB ServerIron is down."\par
+\tab ::= \{ snL4Gen 47 \}\par
+\par
+\par
+snL4EnableGslbRemoteGslbSiUpTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Connection to GSLB ServerIron is up."\par
+\tab ::= \{ snL4Gen 48 \}\par
+\par
+\par
+snL4EnableGslbRemoteSiDownTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "GSLB connection to remote ServerIron is down."\par
+\tab ::= \{ snL4Gen 49 \}\par
+\par
+\par
+snL4EnableGslbRemoteSiUpTrap        OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ disabled(0), enabled(1) \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "GSLB connection to remote ServerIron is up."\par
+\tab ::= \{ snL4Gen 50 \}\par
+\par
+snL4slbRouterInterfacePortList \tab OBJECT-TYPE\par
+\tab SYNTAX\tab OCTET STRING\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Router interface port list. Each port index is a 16-bit integer\par
+\tab\tab in big endian order. 8-bit is the slot number, the other 8-bit\par
+\tab\tab is the port number."\par
+\tab ::= \{ snL4Gen 51 \}\par
+\par
+\par
+-- Virtual Server table\par
+\par
+snL4VirtualServerTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server table."\par
+\tab ::= \{ snL4VirtualServer 1 \}\par
+\par
+snL4VirtualServerEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in L4 Virtual Server table."\par
+\tab INDEX\tab\{ snL4VirtualServerIndex \}\par
+\tab ::= \{ snL4VirtualServerTable 1 \}\par
+\par
+SnL4VirtualServerEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerIndex\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerVirtualIP\par
+\tab\tab IpAddress,\par
+\tab snL4VirtualServerAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4VirtualServerSDAType\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4VirtualServerDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+snL4VirtualServerIndex  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..64)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The table index for a Virtual Server  entry."\par
+\tab ::= \{ snL4VirtualServerEntry 1 \}\par
+\par
+\par
+snL4VirtualServerName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual server name."\par
+\tab ::= \{ snL4VirtualServerEntry 2 \}\par
+\par
+snL4VirtualServerVirtualIP\par
+\tab OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server IP Address."\par
+\tab ::= \{ snL4VirtualServerEntry 3 \}\par
+\par
+snL4VirtualServerAdminStatus\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server status is ether disabled(0) or enabled(1)."\par
+\tab ::= \{ snL4VirtualServerEntry 4 \}\par
+\par
+snL4VirtualServerSDAType  OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab default(0),\par
+\tab\tab leastconnection(1),\par
+\tab\tab roundrobin(2),\par
+\tab\tab weighted(3)\par
+\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "TCP/UDP Sessions Distribution Algorithms Type."\par
+\tab ::= \{ snL4VirtualServerEntry 5 \}\par
+\par
+ snL4VirtualServerRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a virtual server\par
+\tab\tab entry."\par
+\tab ::= \{snL4VirtualServerEntry  6 \}\par
+\par
+snL4VirtualServerDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4VirtualServerEntry 7 \}\par
+\par
+\par
+-- Real Server table\par
+\par
+snL4RealServerTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server table."\par
+\tab ::= \{ snL4RealServer 1 \}\par
+\par
+snL4RealServerEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server table."\par
+\tab INDEX\tab\{ snL4RealServerIndex \}\par
+\tab ::= \{ snL4RealServerTable 1 \}\par
+\par
+SnL4RealServerEntry ::= SEQUENCE \{\par
+\tab snL4RealServerIndex\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerIP\par
+\tab\tab IpAddress,\par
+\tab snL4RealServerAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4RealServerMaxConnections\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerWeight\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4RealServerDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+snL4RealServerIndex  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..256)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The table index for a Real Server entry."\par
+\tab ::= \{ snL4RealServerEntry 1 \}\par
+snL4RealServerName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server name."\par
+\tab ::= \{ snL4RealServerEntry 2 \}\par
+\par
+snL4RealServerIP\par
+\tab OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server IP Address."\par
+\tab ::= \{ snL4RealServerEntry 3 \}\par
+\par
+snL4RealServerAdminStatus\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server status is ether disabled(0) or enabled(1)."\par
+\tab ::= \{ snL4RealServerEntry 4 \}\par
+\par
+snL4RealServerMaxConnections \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..1000000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Maximum Connection allowed."\par
+\tab ::= \{ snL4RealServerEntry 5 \}\par
+\par
+ snL4RealServerWeight\tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab   (0..65000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server weight"\par
+\tab ::= \{ snL4RealServerEntry 6 \}\par
+\par
+ snL4RealServerRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a real server entry."\par
+\tab ::= \{snL4RealServerEntry  7 \}\par
+\par
+snL4RealServerDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4RealServerEntry 8 \}\par
+\par
+\par
+\par
+-- Virtual Server Port table\par
+\par
+snL4VirtualServerPortTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerPortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Port table."\par
+\tab ::= \{ snL4VirtualServerPort 1 \}\par
+\par
+snL4VirtualServerPortEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerPortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Virtual Server Port table."\par
+\tab INDEX\tab\{ snL4VirtualServerPortIndex \}\par
+\tab ::= \{ snL4VirtualServerPortTable 1 \}\par
+\par
+SnL4VirtualServerPortEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerPortIndex\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerPortPort\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4VirtualServerPortSticky\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortConcurrent\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4VirtualServerPortDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+\par
+snL4VirtualServerPortIndex\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Virtual Server Port entry."\par
+\tab ::= \{ snL4VirtualServerPortEntry 1 \}\par
+\par
+\par
+snL4VirtualServerPortServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortEntry 2 \}\par
+\par
+snL4VirtualServerPortPort       OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab   (0..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortEntry 3 \}\par
+\par
+\par
+snL4VirtualServerPortAdminStatus\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortEntry 4 \}\par
+\par
+\par
+ snL4VirtualServerPortSticky       OBJECT-TYPE\par
+\tab  SYNTAX  INTEGER \{\par
+\tab\tab\tab disabled(0),\par
+\tab\tab\tab enabled(1)       \par
+\tab\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortEntry 5 \}\par
+\par
+\par
+ snL4VirtualServerPortConcurrent       OBJECT-TYPE\par
+\tab  SYNTAX  INTEGER \{\par
+\tab\tab\tab disabled(0),\par
+\tab\tab\tab enabled(1)       \par
+\tab\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortEntry 6 \}\par
+\par
+\par
+ snL4VirtualServerPortRowStatus\tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX L4RowSts\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a virtual server  port entry."\par
+\tab ::= \{ snL4VirtualServerPortEntry 7 \}\par
+\par
+snL4VirtualServerPortDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4VirtualServerPortEntry 8 \}\par
+\par
+\par
+\par
+\par
+-- Real Server Port table\par
+\par
+snL4RealServerPortTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerPortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Port table."\par
+\tab ::= \{ snL4RealServerPort 1 \}\par
+\par
+snL4RealServerPortEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerPortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Port table."\par
+\tab INDEX\tab\{ snL4RealServerPortIndex \}\par
+\tab ::= \{ snL4RealServerPortTable 1 \}\par
+\par
+SnL4RealServerPortEntry ::= SEQUENCE \{\par
+\tab snL4RealServerPortIndex\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerPortServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerPortPort\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerPortAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4RealServerPortRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4RealServerPortDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+\par
+snL4RealServerPortIndex\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Real Server Port entry."\par
+\tab ::= \{ snL4RealServerPortEntry 1 \}\par
+snL4RealServerPortServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortEntry 2 \}\par
+\par
+snL4RealServerPortPort       OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortEntry 3 \}\par
+\par
+\par
+snL4RealServerPortAdminStatus\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortEntry 4 \}\par
+\par
+ snL4RealServerPortRowStatus\tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX L4RowSts\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a Real server  port entry."\par
+\tab ::= \{ snL4RealServerPortEntry 5 \}\par
+\par
+snL4RealServerPortDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4RealServerPortEntry 6 \}\par
+\par
+\par
+\par
+-- Bind table\par
+\par
+snL4BindTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4BindEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Bind table."\par
+\tab ::= \{ snL4Bind 1 \}\par
+\par
+snL4BindEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4BindEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Bind table."\par
+\tab INDEX\tab\{ snL4BindIndex \}\par
+\tab ::= \{ snL4BindTable 1 \}\par
+\par
+SnL4BindEntry ::= SEQUENCE \{\par
+\tab snL4BindIndex\par
+\tab\tab INTEGER,\par
+\tab snL4BindVirtualServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4BindVirtualPortNumber\par
+\tab\tab INTEGER,\par
+\tab snL4BindRealServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4BindRealPortNumber\par
+\tab\tab INTEGER,\par
+\tab snL4BindRowStatus\par
+\tab\tab INTEGER\par
+\tab\}\par
+\par
+\par
+snL4BindIndex\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Bind entry."\par
+\tab ::= \{ snL4BindEntry 1 \}\par
+\par
+snL4BindVirtualServerName \tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4BindEntry 2 \}\par
+\par
+snL4BindVirtualPortNumber        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4BindEntry 3 \}\par
+\par
+\par
+ snL4BindRealServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4BindEntry 4 \}\par
+\par
+snL4BindRealPortNumber       OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4BindEntry 5 \}\par
+snL4BindRowStatus  \tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab\tab   other(1),\par
+\tab\tab\tab   valid(2),\par
+\tab\tab\tab  delete(3),\par
+\tab\tab\tab  create(4)\par
+\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete bind entry."\par
+\tab ::= \{ snL4BindEntry 6 \}\par
+\par
+\par
+\par
+\par
+\par
+-- Virtual Server Status table\par
+\par
+snL4VirtualServerStatusTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Status table."\par
+\tab ::= \{ snL4VirtualServerStatus 1 \}\par
+\par
+snL4VirtualServerStatusEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in L4 Virtual Server Status table."\par
+\tab INDEX\tab\{ snL4VirtualServerStatusIndex \}\par
+\tab ::= \{ snL4VirtualServerStatusTable 1 \}\par
+\par
+SnL4VirtualServerStatusEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerStatusIndex\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerStatusName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerStatusReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerStatusTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerStatusTotalConnections\par
+\tab\tab Counter32\par
+\tab\}\par
+\par
+snL4VirtualServerStatusIndex  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..64)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The table index for a Virtual Server  Status entry."\par
+\tab ::= \{ snL4VirtualServerStatusEntry 1 \}\par
+\par
+\par
+snL4VirtualServerStatusName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual server name."\par
+\tab ::= \{ snL4VirtualServerStatusEntry 2 \}\par
+\par
+\par
+snL4VirtualServerStatusReceivePkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatusEntry 3 \}\par
+\par
+snL4VirtualServerStatusTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatusEntry 4 \}\par
+\par
+snL4VirtualServerStatusTotalConnections  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatusEntry 5 \}\par
+\par
+\par
+-- Real Server Status Table\par
+\par
+snL4RealServerStatusTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Status table."\par
+\tab ::= \{ snL4RealServerStatus 1 \}\par
+\par
+snL4RealServerStatusEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Status table."\par
+\tab INDEX\tab\{ snL4RealServerStatusIndex \}\par
+\tab ::= \{ snL4RealServerStatusTable 1 \}\par
+\par
+SnL4RealServerStatusEntry ::= SEQUENCE \{\par
+\tab snL4RealServerStatusIndex\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerStatusName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerStatusRealIP\par
+\tab\tab IpAddress,\par
+\tab snL4RealServerStatusReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatusTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatusCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatusAge\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusState\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerStatusReassignments\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusReassignmentLimit\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusFailedPortExists\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusFailTime\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatusPeakConnections\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4RealServerStatusIndex  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (1..256)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The table index for a Real Server Status entry."\par
+\tab ::= \{ snL4RealServerStatusEntry 1 \}\par
+\par
+snL4RealServerStatusName OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 2 \}\par
+\par
+snL4RealServerStatusRealIP OBJECT-TYPE\par
+\tab SYNTAX\tab IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 3 \}\par
+\par
+snL4RealServerStatusReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 4 \}\par
+\par
+snL4RealServerStatusTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 5 \}\par
+\par
+snL4RealServerStatusCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 6 \}\par
+\par
+snL4RealServerStatusTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 7 \}\par
+\par
+snL4RealServerStatusAge  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 8 \}\par
+\par
+snL4RealServerStatusState  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab\{\par
+\tab serverdisabled(0),\par
+\tab serverenabled(1),\par
+\tab serverfailed(2),\par
+\tab servertesting(3),\par
+\tab serversuspect(4),\par
+\tab servershutdown(5),\par
+\tab serveractive(6)\par
+\tab\}\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 9 \}\par
+\par
+snL4RealServerStatusReassignments  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 10 \}\par
+\par
+snL4RealServerStatusReassignmentLimit  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 11 \}\par
+\par
+snL4RealServerStatusFailedPortExists  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 12 \}\par
+\par
+snL4RealServerStatusFailTime  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 13 \}\par
+\par
+\par
+snL4RealServerStatusPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatusEntry 14 \}\par
+\par
+\par
+\par
+\par
+-- Virtual Server Port Status table\par
+\par
+snL4VirtualServerPortStatusTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerPortStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Port Status table."\par
+\tab ::= \{ snL4VirtualServerPortStatus 1 \}\par
+\par
+snL4VirtualServerPortStatusEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerPortStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Virtual Server Port Status table."\par
+\tab INDEX\tab\{ snL4VirtualServerPortStatusIndex \}\par
+\tab ::= \{ snL4VirtualServerPortStatusTable 1 \}\par
+\par
+SnL4VirtualServerPortStatusEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerPortStatusIndex\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerPortStatusPort\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortStatusServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerPortStatusCurrentConnection\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerPortStatusTotalConnection\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerPortStatusPeakConnection\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4VirtualServerPortStatusIndex\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Virtual Server Port Status entry."\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 1 \}\par
+\par
+snL4VirtualServerPortStatusPort   OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 2 \}\par
+\par
+ snL4VirtualServerPortStatusServerName \tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 3 \}\par
+\par
+ snL4VirtualServerPortStatusCurrentConnection \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 4 \}\par
+\par
+ snL4VirtualServerPortStatusTotalConnection\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 5 \}\par
+\par
+ snL4VirtualServerPortStatusPeakConnection \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatusEntry 6 \}\par
+\par
+-- Real Server Port Status table\par
+\par
+snL4RealServerPortStatusTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerPortStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Port Status table."\par
+\tab ::= \{ snL4RealServerPortStatus 1 \}\par
+\par
+snL4RealServerPortStatusEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerPortStatusEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Port Status table."\par
+\tab INDEX\tab\{ snL4RealServerPortStatusIndex \}\par
+\tab ::= \{ snL4RealServerPortStatusTable 1 \}\par
+\par
+SnL4RealServerPortStatusEntry ::= SEQUENCE \{\par
+\tab snL4RealServerPortStatusIndex\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerPortStatusPort\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatusServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerPortStatusReassignCount\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatusState\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerPortStatusFailTime\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatusCurrentConnection\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatusTotalConnection\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatusRxPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatusTxPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatusRxBytes\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatusTxBytes\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatusPeakConnection\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+\par
+snL4RealServerPortStatusIndex\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab   (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Real Server Port Status entry."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 1 \}\par
+\par
+snL4RealServerPortStatusPort\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatusEntry 2 \}\par
+\par
+snL4RealServerPortStatusServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatusEntry 3 \}\par
+\par
+snL4RealServerPortStatusReassignCount\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatusEntry 4 \}\par
+\par
+ snL4RealServerPortStatusState\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab\{\par
+\tab\tab disabled(0),\par
+\tab\tab enabled(1),\par
+\tab\tab failed(2),\par
+\tab\tab testing(3),\par
+\tab\tab suspect(4),\par
+\tab\tab shutdown(5),\par
+\tab\tab active(6),\par
+\tab\tab unbound(7),\par
+\tab\tab awaitUnbind(8),\par
+\tab\tab awaitDelete(9)\par
+\tab\}\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port state"\par
+\tab ::= \{ snL4RealServerPortStatusEntry 5 \}\par
+\par
+snL4RealServerPortStatusFailTime \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Only useful, if real server port state is failed.\par
+\tab\tab  Indicating how seconds has been elapsed from the last retry."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 6 \}\par
+\par
+snL4RealServerPortStatusCurrentConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port current connection"\par
+\tab ::= \{ snL4RealServerPortStatusEntry 7 \}\par
+\par
+snL4RealServerPortStatusTotalConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port total connection"\par
+\tab ::= \{ snL4RealServerPortStatusEntry 8 \}\par
+\par
+snL4RealServerPortStatusRxPkts\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port receive packets."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 9 \}\par
+\par
+\par
+snL4RealServerPortStatusTxPkts\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port transmit packets."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 10 \}\par
+\par
+\par
+snL4RealServerPortStatusRxBytes\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port receive bytes."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 11 \}\par
+\par
+snL4RealServerPortStatusTxBytes\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port transmit bytes."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 12 \}\par
+\par
+\par
+snL4RealServerPortStatusPeakConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "peak connection for real server port."\par
+\tab ::= \{ snL4RealServerPortStatusEntry 13 \}\par
+\par
+\par
+\par
+\par
+-- L4 policy table\par
+\par
+snL4PolicyTable\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4PolicyEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "L4 policy table."\par
+\tab ::= \{snL4Policy  1 \}\par
+\par
+snL4PolicyEntry\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4PolicyEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry of the L4 policy table."\par
+\tab INDEX\tab\{ snL4PolicyId \}\par
+\tab ::= \{ snL4PolicyTable 1 \}\par
+\par
+SnL4PolicyEntry ::= SEQUENCE \{\par
+\tab snL4PolicyId\par
+\tab\tab INTEGER,\par
+\tab snL4PolicyPriority\par
+\tab\tab INTEGER,\par
+\tab snL4PolicyScope\par
+\tab\tab INTEGER,\par
+\tab snL4PolicyProtocol\par
+\tab\tab INTEGER,\par
+\tab snL4PolicyPort\par
+\tab\tab INTEGER,\par
+\tab snL4PolicyRowStatus\par
+\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4PolicyId         OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER (1..64)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The  ID to identify a  entry."\par
+\tab ::= \{ snL4PolicyEntry 1 \}\par
+\par
+snL4PolicyPriority\tab    OBJECT-TYPE\par
+\tab SYNTAX  INTEGER \{\par
+\tab\tab level0(0),\par
+\tab\tab level1(1),\par
+\tab\tab level2(2),\par
+\tab\tab level3(3),\par
+\tab\tab level4(4),\par
+\tab\tab level5(5),\par
+\tab\tab level6(6),\par
+\tab\tab level7(7)\par
+\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The Stand alone stackable switch L4 Policy Priority values are:\par
+\tab\tab  normal(0)   \tab\tab  -- normal prority\par
+\tab\tab  high(1) \tab  \tab\tab  -- high prority\par
+\tab\tab  cache(2) \tab  \tab\tab  -- prority for cache\par
+\tab\tab  transparent(3) \tab  -- prority for transparent\par
+\tab\tab  The BigIron switch L4 Priority values are:\par
+\tab\tab level0(0), level1(1), level2(2), level3(3),\par
+\tab\tab level4(4), level5(5), level6(6), level7(7) "\par
+\tab ::= \{ snL4PolicyEntry 2 \}\par
+\par
+snL4PolicyScope\tab    OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER \{ global(0), local(1) \}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab " Scope of the  local or global.\par
+\tab\tab   Global  automatic apply to all port.\par
+\tab\tab   Local  apply to a port."\par
+\tab ::= \{ snL4PolicyEntry 3 \}\par
+\par
+snL4PolicyProtocol     OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER \{ udp(0), tcp(1) \}\par
+\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4PolicyEntry 4 \}\par
+\par
+snL4PolicyPort OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..65535)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION ""\par
+\tab ::= \{ snL4PolicyEntry 5 \}\par
+\par
+snL4PolicyRowStatus  OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER \{\par
+\tab\tab invalid(1),\par
+\tab\tab valid(2),\par
+\tab\tab delete(3),\par
+\tab\tab create(4),\par
+\tab\tab modify(5)\par
+\tab\}\par
+\tab MAX-ACCESS\tab  read-write\par
+\tab STATUS\tab  current\par
+\tab DESCRIPTION\par
+\tab\tab "This object is used to create and\par
+\tab\tab delete row in the table and control\par
+\tab\tab if they are used. The values\par
+\tab\tab that can be written are:\par
+\tab\tab delete(3)...deletes the row\par
+\tab\tab create(4)...creates a new row\par
+\tab\tab modify(5)...modifies an exsisting row\par
+\par
+\tab\tab If the row exists, then a SET with\par
+\tab\tab value of create(4) returns error\par
+\tab\tab 'badValue'. Deleted rows go away\par
+\tab\tab immediately. The following values\par
+\tab\tab can be returned on reads:\par
+\tab\tab invalid(1)...Setting it to 'invalid' has the effect of\par
+\tab\tab\tab\tab\tab  rendering it inoperative.\par
+\tab\tab valid(2).....the row exists and is valid"\par
+\tab ::= \{ snL4PolicyEntry 6 \}\par
+\par
+-- L4 policy port access table\par
+\par
+snL4PolicyPortAccessTable\tab      OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4PolicyPortAccessEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "ip interface L4 policy access table."\par
+\tab ::= \{snL4PolicyPortAccess  1\}\par
+\par
+snL4PolicyPortAccessEntry\tab      OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4PolicyPortAccessEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry of the ip interface L4 policy access  table."\par
+\tab INDEX\tab\{ snL4PolicyPortAccessPort \}\par
+\tab ::= \{ snL4PolicyPortAccessTable 1 \}\par
+\par
+SnL4PolicyPortAccessEntry ::= SEQUENCE \{\par
+\tab snL4PolicyPortAccessPort\par
+\tab\tab Integer32,\par
+\tab snL4PolicyPortAccessList\par
+\tab\tab OCTET STRING,\par
+\tab snL4PolicyPortAccessRowStatus\par
+\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4PolicyPortAccessPort\tab      OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The ip interface to which the L4 policy  applies."\par
+\tab ::= \{ snL4PolicyPortAccessEntry 1 \}\par
+\par
+snL4PolicyPortAccessList  OBJECT-TYPE\par
+\tab SYNTAX\tab OCTET STRING (SIZE(1..64))\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An ip L4 policy  list, of which each octet contains\par
+\tab\tab a  ID number that forms a group of s. A\par
+\tab\tab valid entry in the snL4PolicyTable with the\par
+\tab\tab corresponding  ID number (i.e. snL4PolicyId)\par
+\tab\tab must have been created before a  list is initialized."\par
+\tab ::= \{ snL4PolicyPortAccessEntry 2 \}\par
+\par
+snL4PolicyPortAccessRowStatus   OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab invalid(1),\par
+\tab\tab valid(2),\par
+\tab\tab delete(3),\par
+\tab\tab create(4),\par
+\tab\tab modify(5)\par
+\tab\}\par
+\tab MAX-ACCESS\tab  read-write\par
+\tab STATUS\tab  current\par
+\tab DESCRIPTION\par
+\tab\tab "This object is used to create and\par
+\tab\tab delete row in the table and control\par
+\tab\tab if they are used. The values\par
+\tab\tab that can be written are:\par
+\tab\tab delete(3)...deletes the row\par
+\tab\tab create(4)...creates a new row\par
+\tab\tab modify(5)...modifies an exsisting row\par
+\par
+\tab\tab If the row exists, then a SET with\par
+\tab\tab value of create(4) returns error\par
+\tab\tab 'badValue'. Deleted rows go away\par
+\tab\tab immediately. The following values\par
+\tab\tab can be returned on reads:\par
+\tab\tab invalid(1)...Setting it to 'invalid' has the effect of\par
+\tab\tab\tab\tab\tab  rendering it inoperative.\par
+\tab\tab valid(2).....the row exists and is valid"\par
+\tab ::= \{ snL4PolicyPortAccessEntry 3 \}\par
+\par
+-- L4 trap variable binding objects\par
+\par
+snL4TrapRealServerIP             OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server IP address."\par
+\tab ::= \{ snL4Trap 1 \}\par
+\par
+snL4TrapRealServerName           OBJECT-TYPE\par
+\tab SYNTAX L4ServerName\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server name."\par
+\tab ::= \{ snL4Trap 2 \}\par
+\par
+snL4TrapRealServerPort           OBJECT-TYPE\par
+\tab SYNTAX Integer32\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Transport protocol port number of the real server."\par
+\tab ::= \{ snL4Trap 3 \}\par
+\par
+snL4TrapRealServerCurConnections OBJECT-TYPE\par
+\tab SYNTAX Integer32\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server current connections."\par
+\tab ::= \{ snL4Trap 4 \}\par
+\par
+snL4TrapLinkName OBJECT-TYPE\par
+\tab SYNTAX L4ServerName\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Link name."\par
+\tab ::= \{ snL4Trap 5 \}\par
+\par
+snL4LinkVirtualInterface OBJECT-TYPE\par
+\tab SYNTAX Integer32\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "Link virtual interface."\par
+\tab ::= \{ snL4Trap 6 \}\par
+\par
+-- Web Cache table\par
+\par
+snL4WebCacheTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4WebCacheEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server table."\par
+\tab ::= \{ snL4WebCache 1 \}\par
+\par
+snL4WebCacheEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4WebCacheEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server table."\par
+\tab INDEX\tab\{ snL4WebCacheIP \}\par
+\tab ::= \{ snL4WebCacheTable 1 \}\par
+\par
+SnL4WebCacheEntry ::= SEQUENCE \{\par
+\tab snL4WebCacheIP\par
+\tab\tab IpAddress,\par
+\tab snL4WebCacheName\par
+\tab\tab L4ServerName,\par
+\tab snL4WebCacheAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4WebCacheMaxConnections\par
+\tab\tab INTEGER,\par
+\tab snL4WebCacheWeight\par
+\tab\tab INTEGER,\par
+\tab snL4WebCacheRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4WebCacheDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+snL4WebCacheIP\par
+\tab OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server IP Address."\par
+\tab ::= \{ snL4WebCacheEntry 1 \}\par
+\par
+snL4WebCacheName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server name."\par
+\tab ::= \{ snL4WebCacheEntry 2 \}\par
+\par
+snL4WebCacheAdminStatus\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server status is ether disabled(0) or enabled(1)."\par
+\tab ::= \{ snL4WebCacheEntry 3 \}\par
+\par
+snL4WebCacheMaxConnections \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (0..1000000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Maximum Connection allowed."\par
+\tab ::= \{ snL4WebCacheEntry 4 \}\par
+\par
+ snL4WebCacheWeight\tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab   (1..65000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server weight"\par
+\tab ::= \{ snL4WebCacheEntry 5 \}\par
+\par
+ snL4WebCacheRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a real server entry."\par
+\tab ::= \{snL4WebCacheEntry  6 \}\par
+\par
+snL4WebCacheDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4WebCacheEntry 7 \}\par
+\par
+\par
+-- Web Cache Group table\par
+\par
+\par
+snL4WebCacheGroupTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4WebCacheGroupEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Cache Group table."\par
+\tab ::= \{ snL4WebCacheGroup 1 \}\par
+\par
+snL4WebCacheGroupEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4WebCacheGroupEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the  Web Cache Group table."\par
+\tab INDEX\tab\{ snL4WebCacheGroupId \}\par
+\tab ::= \{ snL4WebCacheGroupTable 1 \}\par
+\par
+SnL4WebCacheGroupEntry ::= SEQUENCE \{\par
+\tab snL4WebCacheGroupId\par
+\tab\tab Integer32,\par
+\tab snL4WebCacheGroupName\par
+\tab\tab L4ServerName,\par
+\tab snL4WebCacheGroupWebCacheIpList\par
+\tab\tab OCTET STRING,\par
+\tab snL4WebCacheGroupDestMask\par
+\tab\tab IpAddress,\par
+\tab snL4WebCacheGroupSrcMask\par
+\tab\tab IpAddress,\par
+\tab snL4WebCacheGroupAdminStatus\par
+\tab\tab INTEGER,\par
+\tab snL4WebCacheGroupRowStatus\par
+\tab\tab L4RowSts\par
+\tab\}\par
+\par
+snL4WebCacheGroupId  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The identification for a Web Cache Group entry.\par
+\tab\tab  The limit is from 1 to snL4MaxNumWebCacheGroup."\par
+\tab ::= \{ snL4WebCacheGroupEntry 1 \}\par
+\par
+snL4WebCacheGroupName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Cache Group name."\par
+\tab ::= \{ snL4WebCacheGroupEntry 2 \}\par
+\par
+snL4WebCacheGroupWebCacheIpList\par
+\tab OBJECT-TYPE\par
+\tab SYNTAX\tab OCTET STRING\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of the Server Cache Group Real Server IP Address.\par
+\tab\tab  The number of IP Address is from 1 (4 OCTETs) to the \par
+\tab\tab  snL4MaxNumServersPerWebCacheGroup, maximum number of \par
+\tab\tab  server IP Address allowed in the list."\par
+\tab ::= \{ snL4WebCacheGroupEntry 3 \}\par
+\par
+snL4WebCacheGroupDestMask \tab OBJECT-TYPE\par
+\tab SYNTAX  IpAddress\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Cache Server Group Destination Mask."\par
+\tab ::= \{ snL4WebCacheGroupEntry 4 \}\par
+\par
+snL4WebCacheGroupSrcMask \tab OBJECT-TYPE\par
+\tab SYNTAX  IpAddress\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Cache Server Group Source Mask."\par
+\tab ::= \{ snL4WebCacheGroupEntry 5 \}\par
+\par
+snL4WebCacheGroupAdminStatus OBJECT-TYPE\par
+\tab SYNTAX  INTEGER \{\par
+\tab\tab disabled(0),             \par
+\tab\tab enabled(1)\par
+\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The WEB Cache Group is set either\par
+\tab\tab  enabled(1)...........activated.\par
+\tab\tab  disabled(0)..........disabled."  \par
+\tab ::= \{ snL4WebCacheGroupEntry 6 \}\par
+\par
+ snL4WebCacheGroupRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a Web Cache Group entry."\par
+\tab ::= \{ snL4WebCacheGroupEntry 7 \}\par
+\par
+\par
+-- Web Cache Traffic Statistics Table \par
+\par
+snL4WebCacheTrafficStatsTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4WebCacheTrafficStatsEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Cache Traffic Statistics table."\par
+\tab ::= \{ snL4WebCacheTrafficStats 1 \}\par
+\par
+snL4WebCacheTrafficStatsEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4WebCacheTrafficStatsEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Web Cache Traffic Statistics table."\par
+\tab INDEX\tab\{ snL4WebCacheTrafficIp , snL4WebCacheTrafficPort\}\par
+\tab ::= \{ snL4WebCacheTrafficStatsTable 1 \}\par
+\par
+SnL4WebCacheTrafficStatsEntry ::= SEQUENCE \{\par
+\tab snL4WebCacheTrafficIp\par
+\tab\tab IpAddress,\par
+\tab snL4WebCacheTrafficPort\par
+\tab\tab INTEGER,\par
+\tab snL4WebCacheCurrConnections\par
+\tab\tab Integer32,\par
+\tab snL4WebCacheTotalConnections\par
+\tab\tab Integer32,\par
+\tab snL4WebCacheTxPkts\par
+\tab\tab Counter32,\par
+\tab snL4WebCacheRxPkts\par
+\tab\tab Counter32,\par
+\tab snL4WebCacheTxOctets\par
+\tab\tab Counter32,\par
+\tab snL4WebCacheRxOctets\par
+\tab\tab Counter32,\par
+\tab snL4WebCachePortState\par
+\tab\tab WebCacheState\par
+\tab\}\par
+\par
+snL4WebCacheTrafficIp \tab OBJECT-TYPE\par
+\tab SYNTAX  IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Cache Server IP Address."\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 1 \}\par
+\par
+snL4WebCacheTrafficPort \tab\tab OBJECT-TYPE\par
+\tab SYNTAX  INTEGER (0..65535)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The WEB Cache port is one of the protocol port such as UDP, TCP etc."\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 2 \}\par
+\par
+snL4WebCacheCurrConnections \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the current connections in WEB Cache group."\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 3 \}\par
+\par
+snL4WebCacheTotalConnections \tab\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The total connections in WEB Cache group."\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 4 \}\par
+\par
+snL4WebCacheTxPkts \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Packets sending from Client/Web-Server to Cache Server"\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 5 \}\par
+\par
+snL4WebCacheRxPkts \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Packets sending from Cache Server to Client/Web-Server"\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 6 \}\par
+\par
+snL4WebCacheTxOctets \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Octets sending from Client/Web-Server to Cache Server"\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 7 \}\par
+\par
+snL4WebCacheRxOctets \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Octets sending from Cache Server to Client/Web-Server"\par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 8 \}\par
+\par
+snL4WebCachePortState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab WebCacheState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Cache Port state." \par
+\tab ::= \{ snL4WebCacheTrafficStatsEntry 9 \}\par
+\par
+-- Web Uncached Traffic Statistics Table \par
+\par
+snL4WebUncachedTrafficStatsTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4WebUncachedTrafficStatsEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Uncached Traffic Statistics table."\par
+\tab ::= \{ snL4WebUncachedTrafficStats 1 \}\par
+\par
+snL4WebUncachedTrafficStatsEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4WebUncachedTrafficStatsEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Web Uncached Traffic Statistics table."\par
+\tab INDEX\tab\{ snL4WebServerPort, snL4WebClientPort \}\par
+\tab ::= \{ snL4WebUncachedTrafficStatsTable 1 \}\par
+\par
+SnL4WebUncachedTrafficStatsEntry ::= SEQUENCE \{\par
+\tab snL4WebServerPort\par
+\tab\tab Integer32,\par
+\tab snL4WebClientPort\par
+\tab\tab Integer32,\par
+\tab snL4WebUncachedTxPkts\par
+\tab\tab Counter32,\par
+\tab snL4WebUncachedRxPkts\par
+\tab\tab Counter32,\par
+\tab snL4WebUncachedTxOctets\par
+\tab\tab Counter32,\par
+\tab snL4WebUncachedRxOctets\par
+\tab\tab Counter32,\par
+\tab snL4WebServerPortName\par
+\tab\tab DisplayString,\par
+\tab snL4WebClientPortName\par
+\tab\tab DisplayString\par
+\tab\}\par
+\par
+snL4WebServerPort \tab\tab\tab OBJECT-TYPE\par
+\tab SYNTAX  Integer32 \par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Server Port."\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 1 \}\par
+\par
+snL4WebClientPort \tab\tab\tab OBJECT-TYPE\par
+\tab SYNTAX  Integer32 \par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Client Port."\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 2 \}\par
+\par
+snL4WebUncachedTxPkts \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Packets sending from Client port to Web Server port"\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 3 \}\par
+\par
+snL4WebUncachedRxPkts \tab\tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Packets sending from Web Server port to Client port"\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 4 \}\par
+\par
+snL4WebUncachedTxOctets \tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Octets sending from Client port to Web Server port"\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 5 \}\par
+\par
+snL4WebUncachedRxOctets \tab OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Number of the Octets sending from Web Server port to Client port"\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 6 \}\par
+\par
+snL4WebServerPortName OBJECT-TYPE\par
+\tab SYNTAX\tab DisplayString (SIZE(0..16))\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS\tab current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Server Port Name string."\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 7 \}\par
+\par
+snL4WebClientPortName OBJECT-TYPE\par
+\tab SYNTAX\tab DisplayString (SIZE(0..16))\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS\tab current\par
+\tab DESCRIPTION\par
+\tab\tab "Web Client Port Name string."\par
+\tab ::= \{ snL4WebUncachedTrafficStatsEntry 8 \}\par
+\par
+\par
+-- Web Cache Server Port table\par
+\par
+snL4WebCachePortTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4WebCachePortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Port table."\par
+\tab ::= \{ snL4WebCachePort 1 \}\par
+\par
+snL4WebCachePortEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4WebCachePortEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Port table."\par
+\tab INDEX\tab\{ snL4WebCachePortServerIp, snL4WebCachePortPort \}\par
+\tab ::= \{ snL4WebCachePortTable 1 \}\par
+\par
+SnL4WebCachePortEntry ::= SEQUENCE \{\par
+\tab snL4WebCachePortServerIp\par
+\tab\tab IpAddress,\par
+\tab snL4WebCachePortPort\par
+\tab\tab INTEGER,\par
+\tab snL4WebCachePortAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4WebCachePortRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4WebCachePortDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+\par
+snL4WebCachePortServerIp \tab OBJECT-TYPE\par
+\tab SYNTAX  IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Cache Server IP Address."\par
+\tab ::= \{ snL4WebCachePortEntry 1 \}\par
+\par
+snL4WebCachePortPort \tab\tab OBJECT-TYPE\par
+\tab SYNTAX  INTEGER (0..65535)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The WEB Cache port is one of the protocol port such as UDP, TCP etc."\par
+\tab ::= \{ snL4WebCachePortEntry 2 \}\par
+\par
+snL4WebCachePortAdminStatus\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4WebCachePortEntry 3 \}\par
+\par
+ snL4WebCachePortRowStatus\tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX \tab L4RowSts\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a Real server  port entry."\par
+\tab ::= \{ snL4WebCachePortEntry 4 \}\par
+\par
+snL4WebCachePortDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4WebCachePortEntry 5 \}\par
+\par
+-- Real Server Configuration table \par
+\par
+snL4RealServerCfgTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server table."\par
+\tab ::= \{ snL4RealServerCfg 1 \}\par
+\par
+snL4RealServerCfgEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server table."\par
+\tab INDEX\tab\{ snL4RealServerCfgIP \}\par
+\tab ::= \{ snL4RealServerCfgTable 1 \}\par
+\par
+SnL4RealServerCfgEntry ::= SEQUENCE \{\par
+\tab snL4RealServerCfgIP\par
+\tab\tab IpAddress,\par
+\tab snL4RealServerCfgName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerCfgAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4RealServerCfgMaxConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerCfgWeight\par
+\tab\tab Integer32,\par
+\tab snL4RealServerCfgRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4RealServerCfgDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+snL4RealServerCfgIP\tab\tab OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server IP Address."\par
+\tab ::= \{ snL4RealServerCfgEntry 1 \}\par
+snL4RealServerCfgName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server name."\par
+\tab ::= \{ snL4RealServerCfgEntry 2 \}\par
+\par
+snL4RealServerCfgAdminStatus\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server status is ether disabled(0) or enabled(1)."\par
+\tab ::= \{ snL4RealServerCfgEntry 3 \}\par
+\par
+snL4RealServerCfgMaxConnections \tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab  (0..1000000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Maximum Connection allowed."\par
+\tab ::= \{ snL4RealServerCfgEntry 4 \}\par
+\par
+ snL4RealServerCfgWeight\tab OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab   (0..65000)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server weight"\par
+\tab ::= \{ snL4RealServerCfgEntry 5 \}\par
+\par
+ snL4RealServerCfgRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a real server entry."\par
+\tab ::= \{snL4RealServerCfgEntry  6 \}\par
+\par
+snL4RealServerCfgDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4RealServerCfgEntry 7 \}\par
+\par
+\par
+-- Real Server Port Statistic table\par
+\par
+snL4RealServerPortCfgTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerPortCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Port table."\par
+\tab ::= \{ snL4RealServerPortCfg 1 \}\par
+\par
+snL4RealServerPortCfgEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerPortCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Port table."\par
+\tab INDEX\tab\{snL4RealServerPortCfgIP,snL4RealServerPortCfgPort  \}\par
+\tab ::= \{ snL4RealServerPortCfgTable 1 \}\par
+\par
+SnL4RealServerPortCfgEntry ::= SEQUENCE \{\par
+\tab snL4RealServerPortCfgIP\par
+\tab\tab IpAddress,\par
+\tab snL4RealServerPortCfgPort\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortCfgServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerPortCfgAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4RealServerPortCfgRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4RealServerPortCfgDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+\par
+snL4RealServerPortCfgIP\tab        OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The IP address for the Real Server ."\par
+\tab ::= \{ snL4RealServerPortCfgEntry 1 \}\par
+\par
+snL4RealServerPortCfgPort       OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab  (0..65535)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortCfgEntry 3 \}\par
+\par
+\par
+snL4RealServerPortCfgServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortCfgEntry 2 \}\par
+\par
+snL4RealServerPortCfgAdminStatus\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortCfgEntry 4 \}\par
+\par
+ snL4RealServerPortCfgRowStatus\tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX L4RowSts\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a Real server  port entry."\par
+\tab ::= \{ snL4RealServerPortCfgEntry 5 \}\par
+\par
+snL4RealServerPortCfgDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4RealServerPortCfgEntry 6 \}\par
+\par
+\par
+-- Virtual Server Configuration table\par
+\par
+snL4VirtualServerCfgTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server table."\par
+\tab ::= \{ snL4VirtualServerCfg 1 \}\par
+\par
+snL4VirtualServerCfgEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in L4 Virtual Server table."\par
+\tab INDEX\tab\{snL4VirtualServerCfgVirtualIP  \}\par
+\tab ::= \{ snL4VirtualServerCfgTable 1 \}\par
+\par
+SnL4VirtualServerCfgEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerCfgVirtualIP\par
+\tab\tab IpAddress,\par
+\tab snL4VirtualServerCfgName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerCfgAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4VirtualServerCfgSDAType\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerCfgRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4VirtualServerCfgDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+snL4VirtualServerCfgVirtualIP  \tab OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server IP Address."\par
+\tab ::= \{ snL4VirtualServerCfgEntry 1 \}\par
+\par
+snL4VirtualServerCfgName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual server name."\par
+\tab ::= \{ snL4VirtualServerCfgEntry 2 \}\par
+\par
+snL4VirtualServerCfgAdminStatus\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server status is ether disabled(0) or enabled(1)."\par
+\tab ::= \{ snL4VirtualServerCfgEntry 3 \}\par
+\par
+snL4VirtualServerCfgSDAType  OBJECT-TYPE\par
+\tab SYNTAX\tab  INTEGER \{\par
+\tab\tab default(0),\par
+\tab\tab leastconnection(1),\par
+\tab\tab roundrobin(2),\par
+\tab\tab weighted(3)\par
+\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "TCP/UDP Sessions Distribution Algorithms Type."\par
+\tab ::= \{ snL4VirtualServerCfgEntry 4 \}\par
+\par
+ snL4VirtualServerCfgRowStatus OBJECT-TYPE\par
+\tab SYNTAX  L4RowSts\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a virtual server\par
+\tab\tab entry."\par
+\tab ::= \{snL4VirtualServerCfgEntry  5 \}\par
+\par
+snL4VirtualServerCfgDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4VirtualServerCfgEntry 6 \}\par
+\par
+\par
+-- Virtual Server Port Configuration table\par
+\par
+snL4VirtualServerPortCfgTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerPortCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Port table."\par
+\tab ::= \{ snL4VirtualServerPortCfg 1 \}\par
+\par
+snL4VirtualServerPortCfgEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerPortCfgEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Virtual Server Port table."\par
+\tab INDEX\tab\{snL4VirtualServerPortCfgIP, snL4VirtualServerPortCfgPort  \}\par
+\tab ::= \{ snL4VirtualServerPortCfgTable 1 \}\par
+\par
+SnL4VirtualServerPortCfgEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerPortCfgIP\par
+\tab\tab IpAddress,\par
+\tab snL4VirtualServerPortCfgPort\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerPortCfgServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerPortCfgAdminStatus\par
+\tab\tab L4Status,\par
+\tab snL4VirtualServerPortCfgSticky\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortCfgConcurrent\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortCfgRowStatus\par
+\tab\tab L4RowSts,\par
+\tab snL4VirtualServerPortCfgDeleteState\par
+\tab\tab L4DeleteState\par
+\tab\}\par
+\par
+\par
+snL4VirtualServerPortCfgIP       OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server IP Address."\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 1 \}\par
+\par
+snL4VirtualServerPortCfgPort       OBJECT-TYPE\par
+\tab SYNTAX   Integer32\tab   (0..65535)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 2 \}\par
+\par
+\par
+snL4VirtualServerPortCfgServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 3 \}\par
+\par
+snL4VirtualServerPortCfgAdminStatus\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4Status\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 4 \}\par
+\par
+\par
+ snL4VirtualServerPortCfgSticky       OBJECT-TYPE\par
+\tab  SYNTAX  INTEGER \{\par
+\tab\tab\tab disabled(0),\par
+\tab\tab\tab enabled(1)       \par
+\tab\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 5 \}\par
+\par
+\par
+ snL4VirtualServerPortCfgConcurrent       OBJECT-TYPE\par
+\tab  SYNTAX  INTEGER \{\par
+\tab\tab\tab disabled(0),\par
+\tab\tab\tab enabled(1)       \par
+\tab\tab\tab\}\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 6 \}\par
+\par
+\par
+ snL4VirtualServerPortCfgRowStatus\tab  \tab        OBJECT-TYPE\par
+\tab SYNTAX L4RowSts\tab\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "To create or delete a virtual server  port entry."\par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 7 \}\par
+\par
+snL4VirtualServerPortCfgDeleteState\tab OBJECT-TYPE\par
+\tab SYNTAX\tab L4DeleteState\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Delete operation state." \par
+\tab ::= \{ snL4VirtualServerPortCfgEntry 8 \}\par
+\par
+\par
+\par
+-- Virtual Server Statistic table\par
+\par
+snL4VirtualServerStatisticTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Statistic table."\par
+\tab ::= \{ snL4VirtualServerStatistic 1 \}\par
+\par
+snL4VirtualServerStatisticEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in L4 Virtual Server Statistic table."\par
+\tab INDEX\tab\{snL4VirtualServerStatisticIP  \}\par
+\tab ::= \{ snL4VirtualServerStatisticTable 1 \}\par
+\par
+SnL4VirtualServerStatisticEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerStatisticIP \par
+\tab\tab IpAddress,\par
+\tab snL4VirtualServerStatisticName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerStatisticReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerStatisticTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerStatisticTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerStatisticReceiveBytes\par
+\tab    Counter64,\par
+\tab snL4VirtualServerStatisticTransmitBytes\par
+\tab    Counter64,\par
+\tab snL4VirtualServerStatisticSymmetricState\par
+\tab    Integer32,\par
+\tab snL4VirtualServerStatisticSymmetricPriority\par
+\tab    Integer32,\par
+\tab snL4VirtualServerStatisticSymmetricKeep\par
+\tab    Integer32,\par
+\tab snL4VirtualServerStatisticSymmetricActivates\par
+\tab    Counter32,\par
+\tab snL4VirtualServerStatisticSymmetricInactives\par
+\tab    Counter32,\par
+\tab snL4VirtualServerStatisticSymmetricBestStandbyMacAddr\par
+\tab    PhysAddress,\par
+\tab snL4VirtualServerStatisticSymmetricActiveMacAddr\par
+\tab    PhysAddress\par
+\tab\}\par
+\par
+snL4VirtualServerStatisticIP  OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The table index for a Virtual Server  Statistic entry."\par
+\tab ::= \{ snL4VirtualServerStatisticEntry 1 \}\par
+\par
+\par
+snL4VirtualServerStatisticName  OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual server name."\par
+\tab ::= \{ snL4VirtualServerStatisticEntry 2 \}\par
+\par
+\par
+snL4VirtualServerStatisticReceivePkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 3 \}\par
+\par
+snL4VirtualServerStatisticTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 4 \}\par
+\par
+snL4VirtualServerStatisticTotalConnections  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 5 \}\par
+\par
+snL4VirtualServerStatisticReceiveBytes  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter64\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 6 \}\par
+\par
+snL4VirtualServerStatisticTransmitBytes  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter64\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 7 \}\par
+\par
+snL4VirtualServerStatisticSymmetricState  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 8 \}\par
+\par
+snL4VirtualServerStatisticSymmetricPriority  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 9 \}\par
+\par
+snL4VirtualServerStatisticSymmetricKeep  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 10 \}\par
+\par
+snL4VirtualServerStatisticSymmetricActivates  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 11 \}\par
+\par
+snL4VirtualServerStatisticSymmetricInactives  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 12 \}\par
+\par
+snL4VirtualServerStatisticSymmetricBestStandbyMacAddr  OBJECT-TYPE\par
+\tab SYNTAX\tab PhysAddress\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 13 \}\par
+\par
+snL4VirtualServerStatisticSymmetricActiveMacAddr  OBJECT-TYPE\par
+\tab SYNTAX\tab PhysAddress\par
+\tab MAX-ACCESS\tab read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "" \par
+\tab ::= \{ snL4VirtualServerStatisticEntry 14 \}\par
+\par
+\par
+-- Real Server Statistic Table\par
+\par
+snL4RealServerStatisticTable  OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Statistic table."\par
+\tab ::= \{ snL4RealServerStatistic 1 \}\par
+\par
+snL4RealServerStatisticEntry  OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Statistic table."\par
+\tab INDEX\tab\{snL4RealServerStatisticRealIP  \}\par
+\tab ::= \{ snL4RealServerStatisticTable 1 \}\par
+\par
+SnL4RealServerStatisticEntry ::= SEQUENCE \{\par
+\tab snL4RealServerStatisticRealIP \par
+\tab\tab IpAddress,\par
+\tab snL4RealServerStatisticName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerStatisticReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatisticTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatisticCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4RealServerStatisticAge\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticState\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerStatisticReassignments\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticReassignmentLimit\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticFailedPortExists\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticFailTime\par
+\tab\tab Integer32,\par
+\tab snL4RealServerStatisticPeakConnections\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4RealServerStatisticRealIP OBJECT-TYPE\par
+\tab SYNTAX\tab IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 1 \}\par
+\par
+\par
+snL4RealServerStatisticName OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 2 \}\par
+\par
+snL4RealServerStatisticReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 3 \}\par
+\par
+snL4RealServerStatisticTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 4 \}\par
+\par
+snL4RealServerStatisticCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 5 \}\par
+\par
+snL4RealServerStatisticTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 6 \}\par
+\par
+snL4RealServerStatisticAge  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 7 \}\par
+\par
+snL4RealServerStatisticState  OBJECT-TYPE\par
+\tab SYNTAX   INTEGER\{\par
+\tab serverdisabled(0),\par
+\tab serverenabled(1),\par
+\tab serverfailed(2),\par
+\tab servertesting(3),\par
+\tab serversuspect(4),\par
+\tab servershutdown(5),\par
+\tab serveractive(6)\par
+\tab\}\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 8 \}\par
+\par
+snL4RealServerStatisticReassignments  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 9 \}\par
+\par
+snL4RealServerStatisticReassignmentLimit  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 10 \}\par
+\par
+snL4RealServerStatisticFailedPortExists  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 11 \}\par
+\par
+snL4RealServerStatisticFailTime  OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 12 \}\par
+\par
+\par
+snL4RealServerStatisticPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerStatisticEntry 13 \}\par
+\par
+\par
+\par
+\par
+-- Virtual Server Port Statistic table\par
+\par
+snL4VirtualServerPortStatisticTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4VirtualServerPortStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Virtual Server Port Statistic table."\par
+\tab ::= \{ snL4VirtualServerPortStatistic 1 \}\par
+\par
+snL4VirtualServerPortStatisticEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4VirtualServerPortStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Virtual Server Port Statistic table."\par
+\tab INDEX\tab\{ snL4VirtualServerPortStatisticIP,snL4VirtualServerPortStatisticPort \}\par
+\tab ::= \{ snL4VirtualServerPortStatisticTable 1 \}\par
+\par
+SnL4VirtualServerPortStatisticEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerPortStatisticIP\par
+\tab\tab IpAddress,\par
+\tab snL4VirtualServerPortStatisticPort\par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortStatisticServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4VirtualServerPortStatisticCurrentConnection\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerPortStatisticTotalConnection\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerPortStatisticPeakConnection\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4VirtualServerPortStatisticIP\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Virtual Server Port Statistic entry."\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 1 \}\par
+\par
+snL4VirtualServerPortStatisticPort   OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab  (1..2048)\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 2 \}\par
+\par
+ snL4VirtualServerPortStatisticServerName \tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 3 \}\par
+\par
+ snL4VirtualServerPortStatisticCurrentConnection \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 4 \}\par
+\par
+ snL4VirtualServerPortStatisticTotalConnection\tab\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 5 \}\par
+\par
+ snL4VirtualServerPortStatisticPeakConnection \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortStatisticEntry 6 \}\par
+\par
+-- Real Server Port Statistic table\par
+\par
+snL4RealServerPortStatisticTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4RealServerPortStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real Server Port Statistic table."\par
+\tab ::= \{ snL4RealServerPortStatistic 1 \}\par
+\par
+snL4RealServerPortStatisticEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4RealServerPortStatisticEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry in the Real Server Port Statistic table."\par
+\tab INDEX\tab\{ snL4RealServerPortStatisticIP,snL4RealServerPortStatisticPort \}\par
+\tab ::= \{ snL4RealServerPortStatisticTable 1 \}\par
+\par
+SnL4RealServerPortStatisticEntry ::= SEQUENCE \{\par
+\tab snL4RealServerPortStatisticIP\par
+\tab\tab IpAddress,\par
+\tab snL4RealServerPortStatisticPort\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatisticServerName\par
+\tab\tab L4ServerName,\par
+\tab snL4RealServerPortStatisticReassignCount\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatisticState\par
+\tab\tab INTEGER,\par
+\tab snL4RealServerPortStatisticFailTime\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatisticCurrentConnection\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortStatisticTotalConnection\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatisticRxPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatisticTxPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatisticRxBytes\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatisticTxBytes\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortStatisticPeakConnection\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+\par
+snL4RealServerPortStatisticIP\tab        OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for Real Server Port Statistic entry."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 1 \}\par
+\par
+snL4RealServerPortStatisticPort\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 2 \}\par
+\par
+snL4RealServerPortStatisticServerName\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab L4ServerName\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 3 \}\par
+\par
+snL4RealServerPortStatisticReassignCount\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 4 \}\par
+\par
+ snL4RealServerPortStatisticState\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab\{\par
+\tab\tab disabled(0),\par
+\tab\tab enabled(1),\par
+\tab\tab failed(2),\par
+\tab\tab testing(3),\par
+\tab\tab suspect(4),\par
+\tab\tab shutdown(5),\par
+\tab\tab active(6),\par
+\tab\tab unbound(7),\par
+\tab\tab awaitUnbind(8),\par
+\tab\tab awaitDelete(9)\par
+\tab\}\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port state"\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 5 \}\par
+\par
+snL4RealServerPortStatisticFailTime \tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Only useful, if real server port state is failed.\par
+\tab\tab  Indicating how seconds has been elapsed from the last retry."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 6 \}\par
+\par
+snL4RealServerPortStatisticCurrentConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port current connection"\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 7 \}\par
+\par
+snL4RealServerPortStatisticTotalConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port total connection"\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 8 \}\par
+\par
+snL4RealServerPortStatisticRxPkts\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port receive packets."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 9 \}\par
+\par
+\par
+snL4RealServerPortStatisticTxPkts\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port transmit packets."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 10 \}\par
+\par
+\par
+snL4RealServerPortStatisticRxBytes\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port receive bytes."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 11 \}\par
+\par
+snL4RealServerPortStatisticTxBytes\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "Real server port transmit bytes."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 12 \}\par
+\par
+\par
+snL4RealServerPortStatisticPeakConnection\tab        OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "peak connection for real server port."\par
+\tab ::= \{ snL4RealServerPortStatisticEntry 13 \}\par
+\par
+\par
+-- GSLB Site Remote ServerIron Configuration table\par
+\par
+snL4GslbSiteRemoteServerIronTable\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SEQUENCE OF SnL4GslbSiteRemoteServerIronEntry\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "GSLB remote ServerIron configuration table."\par
+\tab ::= \{ snL4GslbSiteRemoteServerIrons 1 \}\par
+\par
+snL4GslbSiteRemoteServerIronEntry\tab        OBJECT-TYPE\par
+\tab SYNTAX\tab SnL4GslbSiteRemoteServerIronEntry\tab\par
+\tab MAX-ACCESS  not-accessible\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "An entry of a GSLB remote ServerIron configuration."\par
+\tab INDEX\tab\{ snL4GslbSiteRemoteServerIronIP \}\par
+\tab ::= \{ snL4GslbSiteRemoteServerIronTable 1 \}\par
+\par
+SnL4GslbSiteRemoteServerIronEntry ::= SEQUENCE \{\par
+\tab snL4GslbSiteRemoteServerIronIP\par
+\tab\tab IpAddress,\par
+\tab snL4GslbSiteRemoteServerIronPreference\par
+\tab\tab INTEGER\par
+\tab\}\par
+\par
+\par
+snL4GslbSiteRemoteServerIronIP\tab        OBJECT-TYPE\par
+\tab SYNTAX IpAddress\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The index for each remote ServerIron in a site."\par
+\tab ::= \{ snL4GslbSiteRemoteServerIronEntry 1 \}\par
+\par
+snL4GslbSiteRemoteServerIronPreference \tab OBJECT-TYPE\par
+\tab SYNTAX\tab INTEGER\tab (0..255)\par
+\tab MAX-ACCESS  read-write\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab "The preference of a remote ServerIron. The default value is 128."\par
+\tab DEFVAL \{ 128 \}\par
+\tab ::= \{ snL4GslbSiteRemoteServerIronEntry 2 \}\par
+\par
+\par
+-- Real Server Monitor Group\par
+\par
+-- The Real Server History Control Group\par
+\par
+-- The snL4History control group controls the periodic statistical\par
+-- sampling of data from various types of data sources.  The\par
+-- snL4RealServerHistoryControlTable stores configuration entries that each\par
+-- define an interface, polling period, and other parameters.\par
+-- Once samples are taken, their data is stored in an entry\par
+-- in a media-specific table.  Each such entry defines one\par
+-- sample, and is associated with the snL4RealServerHistoryControlEntry that\par
+-- caused the sample to be taken.  Each counter in the\par
+-- snL4HistoryEntry counts the same event as its\par
+-- similarly-named counterpart in the Statistics Entry,\par
+-- except that each value here is a cumulative sum during a\par
+-- sampling period.\par
+--\par
+-- If the probe keeps track of the time of day, it should\par
+-- start the first sample of the snL4History at a time such that\par
+-- when the next hour of the day begins, a sample is\par
+-- started at that instant.  This tends to make more\par
+-- user-friendly reports, and enables comparison of reports\par
+-- from different probes that have relatively accurate time\par
+-- of day.\par
+--\par
+-- The probe is encouraged to add two snL4History control entries\par
+-- per monitored interface upon initialization that describe\par
+-- a short term and a long term polling period.  Suggested\par
+-- parameters are 30 seconds for the short term polling period\par
+-- and 30 minutes for the long term period.\par
+\par
+snL4RealServerHistoryControlTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4RealServerHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of history control entries."\par
+\tab ::= \{ snL4History 1 \}\par
+\par
+snL4RealServerHistoryControlEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4RealServerHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of parameters that set up a periodic sampling\par
+\tab\tab of statistics.As an example, an instance of the\par
+\tab\tab snL4RealServerHistoryControlInterval object might be named\par
+\tab\tab snL4RealServerHistoryControlInterval.2"\par
+\tab INDEX \{ snL4RealServerHistoryControlIndex \}\par
+\tab ::= \{ snL4RealServerHistoryControlTable 1 \}\par
+\par
+\tab SnL4RealServerHistoryControlEntry ::= SEQUENCE \{\par
+\tab\tab snL4RealServerHistoryControlIndex\tab\tab\tab  \par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerHistoryControlDataSource\tab\tab\par
+\tab\tab\tab OBJECT IDENTIFIER,\par
+\tab\tab snL4RealServerHistoryControlBucketsRequested\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerHistoryControlBucketsGranted\tab\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerHistoryControlInterval\tab\tab\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerHistoryControlOwner\tab\tab\tab  \par
+\tab\tab\tab DisplayString,\par
+\tab\tab snL4RealServerHistoryControlStatus\tab\tab\tab\par
+\tab\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4RealServerHistoryControlIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies an entry in the\par
+\tab\tab snL4RealServerHistoryControl table.Each such entry defines a\par
+\tab\tab set of samples at a particular interval for an\par
+\tab\tab interface on the device."\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 1 \}\par
+\par
+snL4RealServerHistoryControlDataSource OBJECT-TYPE\par
+\tab SYNTAX OBJECT IDENTIFIER\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "This object identifies the source of the data for\par
+\tab\tab which historical data was collected and\par
+\tab\tab placed in a media-specific table on behalf of this\par
+\tab\tab snL4RealServerHistoryControlEntry.This source can be any\par
+\tab\tab real/virtual server and real/virtual server port on \par
+\tab\tab this ServerIron.  In order to identify\par
+\tab\tab a particular instance, this object shall identify\par
+\tab\tab the instance of the object, defined in the above \par
+\tab\tab statistics tables.\par
+\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4RealServerHistoryControlStatus object is equal to valid(1)."\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 2 \}\par
+\par
+snL4RealServerHistoryControlBucketsRequested OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The requested number of discrete time intervals\par
+\tab\tab over which data is to be saved in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4RealServerHistoryControlEntry.\par
+\tab\par
+\tab\tab When this object is created or modified, the probe\par
+\tab\tab should set snL4RealServerHistoryControlBucketsGranted as closely to\par
+\tab\tab this object as is possible for the particular probe\par
+\tab\tab implementation and available resources."\par
+\tab DEFVAL \{ 50 \}\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 3 \}\par
+\par
+snL4RealServerHistoryControlBucketsGranted OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The number of discrete sampling intervals\par
+\tab\tab over which data shall be saved in the part of\par
+\tab\tab the media-specific table associated with this\par
+\tab\tab snL4RealServerHistoryControlEntry.\par
+\tab\par
+\tab\tab When the associated snL4RealServerHistoryControlBucketsRequested\par
+\tab\tab object is created or modified, the probe\par
+\tab\tab should set this object as closely to the requested\par
+\tab\tab value as is possible for the particular\par
+\tab\tab probe implementation and available resources.The\par
+\tab\tab probe must not lower this value except as a result\par
+\tab\tab of a modification to the associated\par
+\tab\tab snL4RealServerHistoryControlBucketsRequested object.\par
+\tab\par
+\tab\tab There will be times when the actual number of\par
+\tab\tab buckets associated with this entry is less than\par
+\tab\tab the value of this object.In this case, at the\par
+\tab\tab end of each sampling interval, a new bucket will\par
+\tab\tab be added to the media-specific table.\par
+\tab\par
+\tab\tab When the number of buckets reaches the value of\par
+\tab\tab this object and a new bucket is to be added to the\par
+\tab\tab media-specific table, the oldest bucket associated\par
+\tab\tab with this snL4RealServerHistoryControlEntry shall be deleted by\par
+\tab\tab the agent so that the new bucket can be added.\par
+\tab\par
+\tab\tab When the value of this object changes to a value less\par
+\tab\tab than the current value, entries are deleted\par
+\tab\tab from the media-specific table associated with this\par
+\tab\tab snL4RealServerHistoryControlEntry.Enough of the oldest of these\par
+\tab\tab entries shall be deleted by the agent so that their\par
+\tab\tab number remains less than or equal to the new value of\par
+\tab\tab this object.\par
+\tab\par
+\tab\tab When the value of this object changes to a value\par
+\tab\tab greater than the current value, the number of\par
+\tab\tab associated media- specific entries may be allowed to\par
+\tab\tab grow."\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 4 \}\par
+\par
+snL4RealServerHistoryControlInterval OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..3600)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The interval in seconds over which the data is\par
+\tab\tab sampled for each bucket in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4RealServerHistoryControlEntry.This interval can\par
+\tab\tab be set to any number of seconds between 1 and\par
+\tab\tab 3600 (1 hour).\par
+\tab\par
+\tab\tab Because the counters in a bucket may overflow at their\par
+\tab\tab maximum value with no indication, a prudent manager\par
+\tab\tab will take into account the possibility of overflow\par
+\tab\tab in any of the associated counters.It is important\par
+\tab\tab to consider the minimum time in which any counter\par
+\tab\tab could overflow on a particular media type and set\par
+\tab\tab the snL4RealServerHistoryControlInterval object to a value less\par
+\tab\tab than this interval.This is typically most\par
+\tab\tab important for the 'octets' counter in any\par
+\tab\tab media-specific table.\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4RealServerHistoryControlStatus object is equal to valid(1)."\par
+\tab DEFVAL \{ 1800 \}\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 5 \}\par
+\par
+snL4RealServerHistoryControlOwner OBJECT-TYPE\par
+\tab SYNTAX DisplayString\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The entity that configured this entry and is\par
+\tab\tab therefore using the resources assigned to it."\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 6 \}\par
+\par
+snL4RealServerHistoryControlStatus OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ \par
+\tab\tab\tab\tab valid(1),\par
+\tab\tab\tab\tab createRequest(2),\par
+\tab\tab\tab\tab underCreation(3),\par
+\tab\tab\tab\tab invalid(4)\par
+\tab\tab    \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The status of this snL4RealServerHistoryControl entry.\par
+\tab\tab Each instance of the media-specific table associated\par
+\tab\tab with this snL4RealServerHistoryControlEntry will be deleted by the\par
+\tab\tab agent if this snL4RealServerHistoryControlEntry is not equal to\par
+\tab\tab valid(1)."\par
+\tab ::= \{ snL4RealServerHistoryControlEntry 7 \}\par
+\par
+\par
+-- The Real Server History Group\par
+\par
+\par
+snL4RealServerHistoryTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4RealServerHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of Ethernet snL4History entries."\par
+\tab ::= \{ snL4History 2 \}\par
+\par
+snL4RealServerHistoryEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4RealServerHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An historical sample of Ethernet statistics on a\par
+\tab\tab particular Ethernet interface.  This sample is\par
+\tab\tab associated with the snL4RealServerHistoryControlEntry which set up\par
+\tab\tab the parameters for a regular collection of these\par
+\tab\tab samples.  As an example, an instance of the\par
+\tab\tab snL4RealServerHistoryReceivePkts object might be named\par
+\tab\tab snL4RealServerHistoryReceivePkts.2.89"\par
+\tab INDEX \{ snL4RealServerHistoryIndex , snL4RealServerHistorySampleIndex \}\par
+\tab ::= \{ snL4RealServerHistoryTable 1 \}\par
+\par
+SnL4RealServerHistoryEntry ::= SEQUENCE \{\par
+\tab snL4RealServerHistoryIndex                 \par
+\tab\tab INTEGER ,\par
+\tab snL4RealServerHistorySampleIndex           \par
+\tab\tab INTEGER ,\par
+\tab snL4RealServerHistoryIntervalStart         \par
+\tab\tab TimeTicks,\par
+\tab snL4RealServerHistoryReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerHistoryTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerHistoryTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4RealServerHistoryCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerHistoryPeakConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerHistoryReassignments\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4RealServerHistoryIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The snL4RealServerHistory of which this entry is a part.The\par
+\tab\tab snL4RealServerHistory identified by a particular value of this\par
+\tab\tab index is the same snL4RealServerHistory as identified\par
+\tab\tab by the same value of snL4RealServerHistoryControlIndex."\par
+\tab ::= \{ snL4RealServerHistoryEntry 1 \}\par
+\par
+snL4RealServerHistorySampleIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..2147483647)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies the particular\par
+\tab\tab sample this entry represents among all samples\par
+\tab\tab associated with the same snL4RealServerHistoryControlEntry.\par
+\tab\tab This index starts at 1 and increases by one\par
+\tab\tab as each new sample is taken."\par
+\tab ::= \{ snL4RealServerHistoryEntry 2 \}\par
+\par
+snL4RealServerHistoryIntervalStart OBJECT-TYPE\par
+\tab SYNTAX TimeTicks\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The value of sysUpTime at the start of the interval\par
+\tab\tab over which this sample was measured.If the probe\par
+\tab\tab keeps track of the time of day, it should start\par
+\tab\tab the first sample of the snL4RealServerHistory at a time such that\par
+\tab\tab when the next hour of the day begins, a sample is\par
+\tab\tab started at that instant.Note that following this\par
+\tab\tab rule may require the probe to delay collecting the\par
+\tab\tab first sample of the snL4RealServerHistory, as each sample must be\par
+\tab\tab of the same interval.Also note that the sample which\par
+\tab\tab is currently being collected is not accessible in this\par
+\tab\tab table until the end of its interval."\par
+\tab ::= \{ snL4RealServerHistoryEntry 3 \}\par
+\par
+\par
+snL4RealServerHistoryReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 4 \}\par
+\par
+snL4RealServerHistoryTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 5 \}\par
+\par
+snL4RealServerHistoryTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 6 \}\par
+\par
+snL4RealServerHistoryCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 7 \}\par
+\par
+snL4RealServerHistoryPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 8 \}\par
+\par
+snL4RealServerHistoryReassignments   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerHistoryEntry 9 \}\par
+\par
+\par
+-- Real Server Port Monitor Group\par
+\par
+-- The Real Server Port History Control Group\par
+\par
+snL4RealServerPortHistoryControlTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4RealServerPortHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of history control entries."\par
+\tab ::= \{ snL4History 3 \}\par
+\par
+snL4RealServerPortHistoryControlEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4RealServerPortHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of parameters that set up a periodic sampling\par
+\tab\tab of statistics.As an example, an instance of the\par
+\tab\tab snL4RealServerPortHistoryControlInterval object might be named\par
+\tab\tab snL4RealServerPortHistoryControlInterval.2"\par
+\tab INDEX \{ snL4RealServerPortHistoryControlIndex \}\par
+\tab ::= \{ snL4RealServerPortHistoryControlTable 1 \}\par
+\par
+\tab SnL4RealServerPortHistoryControlEntry ::= SEQUENCE \{\par
+\tab\tab snL4RealServerPortHistoryControlIndex\tab\tab\tab  \par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerPortHistoryControlDataSource\tab\tab\par
+\tab\tab\tab OBJECT IDENTIFIER,\par
+\tab\tab snL4RealServerPortHistoryControlBucketsRequested\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerPortHistoryControlBucketsGranted\tab\par
+\tab\tab\tab INTEGER,\par
+\tab\tab snL4RealServerPortHistoryControlInterval\tab\tab\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4RealServerPortHistoryControlOwner\tab\tab\tab  \par
+\tab\tab\tab DisplayString,\par
+\tab\tab snL4RealServerPortHistoryControlStatus\tab\tab\tab\par
+\tab\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4RealServerPortHistoryControlIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies an entry in the\par
+\tab\tab snL4RealServerPortHistoryControl table.Each such entry defines a\par
+\tab\tab set of samples at a particular interval for an\par
+\tab\tab interface on the device."\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 1 \}\par
+\par
+snL4RealServerPortHistoryControlDataSource OBJECT-TYPE\par
+\tab SYNTAX OBJECT IDENTIFIER\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "This object identifies the source of the data for\par
+\tab\tab which historical data was collected and\par
+\tab\tab placed in a media-specific table on behalf of this\par
+\tab\tab snL4RealServerPortHistoryControlEntry.This source can be any\par
+\tab\tab real/virtual server and real/virtual server port on \par
+\tab\tab this ServerIron.  In order to identify\par
+\tab\tab a particular instance, this object shall identify\par
+\tab\tab the instance of the object, defined in the above \par
+\tab\tab statistics tables.\par
+\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4RealServerPortHistoryControlStatus object is equal to valid(1)."\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 2 \}\par
+\par
+snL4RealServerPortHistoryControlBucketsRequested OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The requested number of discrete time intervals\par
+\tab\tab over which data is to be saved in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4RealServerPortHistoryControlEntry.\par
+\tab\par
+\tab\tab When this object is created or modified, the probe\par
+\tab\tab should set snL4RealServerPortHistoryControlBucketsGranted as closely to\par
+\tab\tab this object as is possible for the particular probe\par
+\tab\tab implementation and available resources."\par
+\tab DEFVAL \{ 50 \}\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 3 \}\par
+\par
+snL4RealServerPortHistoryControlBucketsGranted OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The number of discrete sampling intervals\par
+\tab\tab over which data shall be saved in the part of\par
+\tab\tab the media-specific table associated with this\par
+\tab\tab snL4RealServerPortHistoryControlEntry.\par
+\tab\par
+\tab\tab When the associated snL4RealServerPortHistoryControlBucketsRequested\par
+\tab\tab object is created or modified, the probe\par
+\tab\tab should set this object as closely to the requested\par
+\tab\tab value as is possible for the particular\par
+\tab\tab probe implementation and available resources.The\par
+\tab\tab probe must not lower this value except as a result\par
+\tab\tab of a modification to the associated\par
+\tab\tab snL4RealServerPortHistoryControlBucketsRequested object.\par
+\tab\par
+\tab\tab There will be times when the actual number of\par
+\tab\tab buckets associated with this entry is less than\par
+\tab\tab the value of this object.In this case, at the\par
+\tab\tab end of each sampling interval, a new bucket will\par
+\tab\tab be added to the media-specific table.\par
+\tab\par
+\tab\tab When the number of buckets reaches the value of\par
+\tab\tab this object and a new bucket is to be added to the\par
+\tab\tab media-specific table, the oldest bucket associated\par
+\tab\tab with this snL4RealServerPortHistoryControlEntry shall be deleted by\par
+\tab\tab the agent so that the new bucket can be added.\par
+\tab\par
+\tab\tab When the value of this object changes to a value less\par
+\tab\tab than the current value, entries are deleted\par
+\tab\tab from the media-specific table associated with this\par
+\tab\tab snL4RealServerPortHistoryControlEntry.Enough of the oldest of these\par
+\tab\tab entries shall be deleted by the agent so that their\par
+\tab\tab number remains less than or equal to the new value of\par
+\tab\tab this object.\par
+\tab\par
+\tab\tab When the value of this object changes to a value\par
+\tab\tab greater than the current value, the number of\par
+\tab\tab associated media- specific entries may be allowed to\par
+\tab\tab grow."\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 4 \}\par
+\par
+snL4RealServerPortHistoryControlInterval OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..3600)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The interval in seconds over which the data is\par
+\tab\tab sampled for each bucket in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4RealServerPortHistoryControlEntry.This interval can\par
+\tab\tab be set to any number of seconds between 1 and\par
+\tab\tab 3600 (1 hour).\par
+\tab\par
+\tab\tab Because the counters in a bucket may overflow at their\par
+\tab\tab maximum value with no indication, a prudent manager\par
+\tab\tab will take into account the possibility of overflow\par
+\tab\tab in any of the associated counters.It is important\par
+\tab\tab to consider the minimum time in which any counter\par
+\tab\tab could overflow on a particular media type and set\par
+\tab\tab the snL4RealServerPortHistoryControlInterval object to a value less\par
+\tab\tab than this interval.This is typically most\par
+\tab\tab important for the 'octets' counter in any\par
+\tab\tab media-specific table.\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4RealServerPortHistoryControlStatus object is equal to valid(1)."\par
+\tab DEFVAL \{ 1800 \}\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 5 \}\par
+\par
+snL4RealServerPortHistoryControlOwner OBJECT-TYPE\par
+\tab SYNTAX DisplayString\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The entity that configured this entry and is\par
+\tab\tab therefore using the resources assigned to it."\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 6 \}\par
+\par
+snL4RealServerPortHistoryControlStatus OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ \par
+\tab\tab\tab\tab valid(1),\par
+\tab\tab\tab\tab createRequest(2),\par
+\tab\tab\tab\tab underCreation(3),\par
+\tab\tab\tab\tab invalid(4)\par
+\tab\tab    \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The status of this snL4RealServerPortHistoryControl entry.\par
+\tab\tab Each instance of the media-specific table associated\par
+\tab\tab with this snL4RealServerPortHistoryControlEntry will be deleted by the\par
+\tab\tab agent if this snL4RealServerPortHistoryControlEntry is not equal to\par
+\tab\tab valid(1)."\par
+\tab ::= \{ snL4RealServerPortHistoryControlEntry 7 \}\par
+\par
+\par
+-- The Real Server Port History Group\par
+\par
+\par
+snL4RealServerPortHistoryTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4RealServerPortHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of Ethernet snL4History entries."\par
+\tab ::= \{ snL4History 4 \}\par
+\par
+snL4RealServerPortHistoryEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4RealServerPortHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An historical sample of Ethernet statistics on a\par
+\tab\tab particular Ethernet interface.  This sample is\par
+\tab\tab associated with the snL4RealServerPortHistoryControlEntry which set up\par
+\tab\tab the parameters for a regular collection of these\par
+\tab\tab samples.  As an example, an instance of the\par
+\tab\tab snL4RealServerPortHistoryReceivePkts object might be named\par
+\tab\tab snL4RealServerPortHistoryReceivePkts.2.89"\par
+\tab INDEX \{ snL4RealServerPortHistoryIndex , snL4RealServerPortHistorySampleIndex \}\par
+\tab ::= \{ snL4RealServerPortHistoryTable 1 \}\par
+\par
+SnL4RealServerPortHistoryEntry ::= SEQUENCE \{\par
+\tab snL4RealServerPortHistoryIndex                 \par
+\tab\tab INTEGER ,\par
+\tab snL4RealServerPortHistorySampleIndex           \par
+\tab\tab INTEGER ,\par
+\tab snL4RealServerPortHistoryIntervalStart         \par
+\tab\tab TimeTicks,\par
+\tab snL4RealServerPortHistoryReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortHistoryTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortHistoryTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4RealServerPortHistoryCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortHistoryPeakConnections\par
+\tab\tab Integer32,\par
+\tab snL4RealServerPortHistoryResponseTime\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4RealServerPortHistoryIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The snL4RealServerPortHistory of which this entry is a part.The\par
+\tab\tab snL4RealServerPortHistory identified by a particular value of this\par
+\tab\tab index is the same snL4RealServerPortHistory as identified\par
+\tab\tab by the same value of snL4RealServerPortHistoryControlIndex."\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 1 \}\par
+\par
+snL4RealServerPortHistorySampleIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..2147483647)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies the particular\par
+\tab\tab sample this entry represents among all samples\par
+\tab\tab associated with the same snL4RealServerPortHistoryControlEntry.\par
+\tab\tab This index starts at 1 and increases by one\par
+\tab\tab as each new sample is taken."\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 2 \}\par
+\par
+snL4RealServerPortHistoryIntervalStart OBJECT-TYPE\par
+\tab SYNTAX TimeTicks\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The value of sysUpTime at the start of the interval\par
+\tab\tab over which this sample was measured.If the probe\par
+\tab\tab keeps track of the time of day, it should start\par
+\tab\tab the first sample of the snL4RealServerPortHistory at a time such that\par
+\tab\tab when the next hour of the day begins, a sample is\par
+\tab\tab started at that instant.Note that following this\par
+\tab\tab rule may require the probe to delay collecting the\par
+\tab\tab first sample of the snL4RealServerPortHistory, as each sample must be\par
+\tab\tab of the same interval.Also note that the sample which\par
+\tab\tab is currently being collected is not accessible in this\par
+\tab\tab table until the end of its interval."\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 3 \}\par
+\par
+\par
+snL4RealServerPortHistoryReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 4 \}\par
+\par
+snL4RealServerPortHistoryTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 5 \}\par
+\par
+snL4RealServerPortHistoryTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 6 \}\par
+\par
+snL4RealServerPortHistoryCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 7 \}\par
+\par
+snL4RealServerPortHistoryPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 8 \}\par
+\par
+snL4RealServerPortHistoryResponseTime   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4RealServerPortHistoryEntry 9 \}\par
+\par
+\par
+-- Virtual Server Monitor Group\par
+-- The Virtual Server History Control Group\par
+\par
+\par
+snL4VirtualServerHistoryControlTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4VirtualServerHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of history control entries."\par
+\tab ::= \{ snL4History 5 \}\par
+\par
+snL4VirtualServerHistoryControlEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4VirtualServerHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of parameters that set up a periodic sampling\par
+\tab\tab of statistics.As an example, an instance of the\par
+\tab\tab snL4VirtualServerHistoryControlInterval object might be named\par
+\tab\tab snL4VirtualServerHistoryControlInterval.2"\par
+\tab INDEX \{ snL4VirtualServerHistoryControlIndex \}\par
+\tab ::= \{ snL4VirtualServerHistoryControlTable 1 \}\par
+\par
+\tab SnL4VirtualServerHistoryControlEntry ::= SEQUENCE \{\par
+\tab\tab snL4VirtualServerHistoryControlIndex\tab\tab\tab  \par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4VirtualServerHistoryControlDataSource\tab\tab\par
+\tab\tab\tab OBJECT IDENTIFIER,\par
+\tab\tab snL4VirtualServerHistoryControlBucketsRequested\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4VirtualServerHistoryControlBucketsGranted\tab\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4VirtualServerHistoryControlInterval\tab\tab\par
+\tab\tab\tab INTEGER ,\par
+\tab\tab snL4VirtualServerHistoryControlOwner\tab\tab\tab  \par
+\tab\tab\tab DisplayString,\par
+\tab\tab snL4VirtualServerHistoryControlStatus\tab\tab\tab\par
+\tab\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4VirtualServerHistoryControlIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies an entry in the\par
+\tab\tab snL4VirtualServerHistoryControl table.Each such entry defines a\par
+\tab\tab set of samples at a particular interval for an\par
+\tab\tab interface on the device."\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 1 \}\par
+\par
+snL4VirtualServerHistoryControlDataSource OBJECT-TYPE\par
+\tab SYNTAX OBJECT IDENTIFIER\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "This object identifies the source of the data for\par
+\tab\tab which historical data was collected and\par
+\tab\tab placed in a media-specific table on behalf of this\par
+\tab\tab snL4VirtualServerHistoryControlEntry.This source can be any\par
+\tab\tab real/virtual server and real/virtual server port on \par
+\tab\tab this ServerIron.  In order to identify\par
+\tab\tab a particular instance, this object shall identify\par
+\tab\tab the instance of the object, defined in the above \par
+\tab\tab statistics tables.\par
+\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4VirtualServerHistoryControlStatus object is equal to valid(1)."\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 2 \}\par
+\par
+snL4VirtualServerHistoryControlBucketsRequested OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The requested number of discrete time intervals\par
+\tab\tab over which data is to be saved in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4VirtualServerHistoryControlEntry.\par
+\tab\par
+\tab\tab When this object is created or modified, the probe\par
+\tab\tab should set snL4VirtualServerHistoryControlBucketsGranted as closely to\par
+\tab\tab this object as is possible for the particular probe\par
+\tab\tab implementation and available resources."\par
+\tab DEFVAL \{ 50 \}\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 3 \}\par
+\par
+snL4VirtualServerHistoryControlBucketsGranted OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The number of discrete sampling intervals\par
+\tab\tab over which data shall be saved in the part of\par
+\tab\tab the media-specific table associated with this\par
+\tab\tab snL4VirtualServerHistoryControlEntry.\par
+\tab\par
+\tab\tab When the associated snL4VirtualServerHistoryControlBucketsRequested\par
+\tab\tab object is created or modified, the probe\par
+\tab\tab should set this object as closely to the requested\par
+\tab\tab value as is possible for the particular\par
+\tab\tab probe implementation and available resources.The\par
+\tab\tab probe must not lower this value except as a result\par
+\tab\tab of a modification to the associated\par
+\tab\tab snL4VirtualServerHistoryControlBucketsRequested object.\par
+\tab\par
+\tab\tab There will be times when the actual number of\par
+\tab\tab buckets associated with this entry is less than\par
+\tab\tab the value of this object.In this case, at the\par
+\tab\tab end of each sampling interval, a new bucket will\par
+\tab\tab be added to the media-specific table.\par
+\tab\par
+\tab\tab When the number of buckets reaches the value of\par
+\tab\tab this object and a new bucket is to be added to the\par
+\tab\tab media-specific table, the oldest bucket associated\par
+\tab\tab with this snL4VirtualServerHistoryControlEntry shall be deleted by\par
+\tab\tab the agent so that the new bucket can be added.\par
+\tab\par
+\tab\tab When the value of this object changes to a value less\par
+\tab\tab than the current value, entries are deleted\par
+\tab\tab from the media-specific table associated with this\par
+\tab\tab snL4VirtualServerHistoryControlEntry.Enough of the oldest of these\par
+\tab\tab entries shall be deleted by the agent so that their\par
+\tab\tab number remains less than or equal to the new value of\par
+\tab\tab this object.\par
+\tab\par
+\tab\tab When the value of this object changes to a value\par
+\tab\tab greater than the current value, the number of\par
+\tab\tab associated media- specific entries may be allowed to\par
+\tab\tab grow."\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 4 \}\par
+\par
+snL4VirtualServerHistoryControlInterval OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..3600)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The interval in seconds over which the data is\par
+\tab\tab sampled for each bucket in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4VirtualServerHistoryControlEntry.This interval can\par
+\tab\tab be set to any number of seconds between 1 and\par
+\tab\tab 3600 (1 hour).\par
+\tab\par
+\tab\tab Because the counters in a bucket may overflow at their\par
+\tab\tab maximum value with no indication, a prudent manager\par
+\tab\tab will take into account the possibility of overflow\par
+\tab\tab in any of the associated counters.It is important\par
+\tab\tab to consider the minimum time in which any counter\par
+\tab\tab could overflow on a particular media type and set\par
+\tab\tab the snL4VirtualServerHistoryControlInterval object to a value less\par
+\tab\tab than this interval.This is typically most\par
+\tab\tab important for the 'octets' counter in any\par
+\tab\tab media-specific table.\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4VirtualServerHistoryControlStatus object is equal to valid(1)."\par
+\tab DEFVAL \{ 1800 \}\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 5 \}\par
+\par
+snL4VirtualServerHistoryControlOwner OBJECT-TYPE\par
+\tab SYNTAX DisplayString\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The entity that configured this entry and is\par
+\tab\tab therefore using the resources assigned to it."\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 6 \}\par
+\par
+snL4VirtualServerHistoryControlStatus OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ \par
+\tab\tab\tab\tab valid(1),\par
+\tab\tab\tab\tab createRequest(2),\par
+\tab\tab\tab\tab underCreation(3),\par
+\tab\tab\tab\tab invalid(4)\par
+\tab\tab    \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The status of this snL4VirtualServerHistoryControl entry.\par
+\tab\tab Each instance of the media-specific table associated\par
+\tab\tab with this snL4VirtualServerHistoryControlEntry will be deleted by the\par
+\tab\tab agent if this snL4VirtualServerHistoryControlEntry is not equal to\par
+\tab\tab valid(1)."\par
+\tab ::= \{ snL4VirtualServerHistoryControlEntry 7 \}\par
+\par
+\par
+-- The Virtual Server History Group\par
+\par
+\par
+snL4VirtualServerHistoryTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4VirtualServerHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of Ethernet snL4History entries."\par
+\tab ::= \{ snL4History 6 \}\par
+\par
+snL4VirtualServerHistoryEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4VirtualServerHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An historical sample of Ethernet statistics on a\par
+\tab\tab particular Ethernet interface.  This sample is\par
+\tab\tab associated with the snL4VirtualServerHistoryControlEntry which set up\par
+\tab\tab the parameters for a regular collection of these\par
+\tab\tab samples.  As an example, an instance of the\par
+\tab\tab snL4VirtualServerHistoryReceivePkts object might be named\par
+\tab\tab snL4VirtualServerHistoryReceivePkts.2.89"\par
+\tab INDEX \{ snL4VirtualServerHistoryIndex , snL4VirtualServerHistorySampleIndex \}\par
+\tab ::= \{ snL4VirtualServerHistoryTable 1 \}\par
+\par
+SnL4VirtualServerHistoryEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerHistoryIndex                 \par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerHistorySampleIndex           \par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerHistoryIntervalStart         \par
+\tab\tab TimeTicks,\par
+\tab snL4VirtualServerHistoryReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerHistoryTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerHistoryTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerHistoryCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerHistoryPeakConnections\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4VirtualServerHistoryIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The snL4VirtualServerHistory of which this entry is a part.The\par
+\tab\tab snL4VirtualServerHistory identified by a particular value of this\par
+\tab\tab index is the same snL4VirtualServerHistory as identified\par
+\tab\tab by the same value of snL4VirtualServerHistoryControlIndex."\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 1 \}\par
+\par
+snL4VirtualServerHistorySampleIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..2147483647)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies the particular\par
+\tab\tab sample this entry represents among all samples\par
+\tab\tab associated with the same snL4VirtualServerHistoryControlEntry.\par
+\tab\tab This index starts at 1 and increases by one\par
+\tab\tab as each new sample is taken."\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 2 \}\par
+\par
+snL4VirtualServerHistoryIntervalStart OBJECT-TYPE\par
+\tab SYNTAX TimeTicks\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The value of sysUpTime at the start of the interval\par
+\tab\tab over which this sample was measured.If the probe\par
+\tab\tab keeps track of the time of day, it should start\par
+\tab\tab the first sample of the snL4VirtualServerHistory at a time such that\par
+\tab\tab when the next hour of the day begins, a sample is\par
+\tab\tab started at that instant.Note that following this\par
+\tab\tab rule may require the probe to delay collecting the\par
+\tab\tab first sample of the snL4VirtualServerHistory, as each sample must be\par
+\tab\tab of the same interval.Also note that the sample which\par
+\tab\tab is currently being collected is not accessible in this\par
+\tab\tab table until the end of its interval."\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 3 \}\par
+\par
+\par
+snL4VirtualServerHistoryReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 4 \}\par
+\par
+snL4VirtualServerHistoryTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 5 \}\par
+\par
+snL4VirtualServerHistoryTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 6 \}\par
+\par
+snL4VirtualServerHistoryCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 7 \}\par
+\par
+snL4VirtualServerHistoryPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerHistoryEntry 8 \}\par
+\par
+\par
+-- Virtual Server Port Monitor Group\par
+\par
+-- The Virtual Server Port History Control Group\par
+\par
+\par
+snL4VirtualServerPortHistoryControlTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4VirtualServerPortHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of history control entries."\par
+\tab ::= \{ snL4History 7 \}\par
+\par
+snL4VirtualServerPortHistoryControlEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4VirtualServerPortHistoryControlEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of parameters that set up a periodic sampling\par
+\tab\tab of statistics.As an example, an instance of the\par
+\tab\tab snL4VirtualServerPortHistoryControlInterval object might be named\par
+\tab\tab snL4VirtualServerPortHistoryControlInterval.2"\par
+\tab INDEX \{ snL4VirtualServerPortHistoryControlIndex \}\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlTable 1 \}\par
+\par
+\tab SnL4VirtualServerPortHistoryControlEntry ::= SEQUENCE \{\par
+\tab\tab snL4VirtualServerPortHistoryControlIndex\tab\tab\tab  \par
+\tab\tab\tab INTEGER,\par
+\tab\tab snL4VirtualServerPortHistoryControlDataSource\tab\tab\par
+\tab\tab\tab OBJECT IDENTIFIER,\par
+\tab\tab snL4VirtualServerPortHistoryControlBucketsRequested\par
+\tab\tab\tab INTEGER,\par
+\tab\tab snL4VirtualServerPortHistoryControlBucketsGranted\tab\par
+\tab\tab\tab INTEGER,\par
+\tab\tab snL4VirtualServerPortHistoryControlInterval\tab\tab\par
+\tab\tab\tab INTEGER,\par
+\tab\tab snL4VirtualServerPortHistoryControlOwner\tab\tab\tab  \par
+\tab\tab\tab DisplayString,\par
+\tab\tab snL4VirtualServerPortHistoryControlStatus\tab\tab\tab\par
+\tab\tab\tab INTEGER\par
+\tab\}\par
+\par
+snL4VirtualServerPortHistoryControlIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies an entry in the\par
+\tab\tab snL4VirtualServerPortHistoryControl table.Each such entry defines a\par
+\tab\tab set of samples at a particular interval for an\par
+\tab\tab interface on the device."\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 1 \}\par
+\par
+snL4VirtualServerPortHistoryControlDataSource OBJECT-TYPE\par
+\tab SYNTAX OBJECT IDENTIFIER\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "This object identifies the source of the data for\par
+\tab\tab which historical data was collected and\par
+\tab\tab placed in a media-specific table on behalf of this\par
+\tab\tab snL4VirtualServerPortHistoryControlEntry.This source can be any\par
+\tab\tab real/virtual server and real/virtual server port on \par
+\tab\tab this ServerIron.  In order to identify\par
+\tab\tab a particular instance, this object shall identify\par
+\tab\tab the instance of the object, defined in the above \par
+\tab\tab statistics tables.\par
+\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4VirtualServerPortHistoryControlStatus object is equal to valid(1)."\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 2 \}\par
+\par
+snL4VirtualServerPortHistoryControlBucketsRequested OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The requested number of discrete time intervals\par
+\tab\tab over which data is to be saved in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4VirtualServerPortHistoryControlEntry.\par
+\tab\par
+\tab\tab When this object is created or modified, the probe\par
+\tab\tab should set snL4VirtualServerPortHistoryControlBucketsGranted as closely to\par
+\tab\tab this object as is possible for the particular probe\par
+\tab\tab implementation and available resources."\par
+\tab DEFVAL \{ 50 \}\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 3 \}\par
+\par
+snL4VirtualServerPortHistoryControlBucketsGranted OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The number of discrete sampling intervals\par
+\tab\tab over which data shall be saved in the part of\par
+\tab\tab the media-specific table associated with this\par
+\tab\tab snL4VirtualServerPortHistoryControlEntry.\par
+\tab\par
+\tab\tab When the associated snL4VirtualServerPortHistoryControlBucketsRequested\par
+\tab\tab object is created or modified, the probe\par
+\tab\tab should set this object as closely to the requested\par
+\tab\tab value as is possible for the particular\par
+\tab\tab probe implementation and available resources.The\par
+\tab\tab probe must not lower this value except as a result\par
+\tab\tab of a modification to the associated\par
+\tab\tab snL4VirtualServerPortHistoryControlBucketsRequested object.\par
+\tab\par
+\tab\tab There will be times when the actual number of\par
+\tab\tab buckets associated with this entry is less than\par
+\tab\tab the value of this object.In this case, at the\par
+\tab\tab end of each sampling interval, a new bucket will\par
+\tab\tab be added to the media-specific table.\par
+\tab\par
+\tab\tab When the number of buckets reaches the value of\par
+\tab\tab this object and a new bucket is to be added to the\par
+\tab\tab media-specific table, the oldest bucket associated\par
+\tab\tab with this snL4VirtualServerPortHistoryControlEntry shall be deleted by\par
+\tab\tab the agent so that the new bucket can be added.\par
+\tab\par
+\tab\tab When the value of this object changes to a value less\par
+\tab\tab than the current value, entries are deleted\par
+\tab\tab from the media-specific table associated with this\par
+\tab\tab snL4VirtualServerPortHistoryControlEntry.Enough of the oldest of these\par
+\tab\tab entries shall be deleted by the agent so that their\par
+\tab\tab number remains less than or equal to the new value of\par
+\tab\tab this object.\par
+\tab\par
+\tab\tab When the value of this object changes to a value\par
+\tab\tab greater than the current value, the number of\par
+\tab\tab associated media- specific entries may be allowed to\par
+\tab\tab grow."\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 4 \}\par
+\par
+snL4VirtualServerPortHistoryControlInterval OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..3600)\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The interval in seconds over which the data is\par
+\tab\tab sampled for each bucket in the part of the\par
+\tab\tab media-specific table associated with this\par
+\tab\tab snL4VirtualServerPortHistoryControlEntry.This interval can\par
+\tab\tab be set to any number of seconds between 1 and\par
+\tab\tab 3600 (1 hour).\par
+\tab\par
+\tab\tab Because the counters in a bucket may overflow at their\par
+\tab\tab maximum value with no indication, a prudent manager\par
+\tab\tab will take into account the possibility of overflow\par
+\tab\tab in any of the associated counters.It is important\par
+\tab\tab to consider the minimum time in which any counter\par
+\tab\tab could overflow on a particular media type and set\par
+\tab\tab the snL4VirtualServerPortHistoryControlInterval object to a value less\par
+\tab\tab than this interval.This is typically most\par
+\tab\tab important for the 'octets' counter in any\par
+\tab\tab media-specific table.\tab\par
+\tab\tab This object may not be modified if the associated\par
+\tab\tab snL4VirtualServerPortHistoryControlStatus object is equal to valid(1)."\par
+\tab DEFVAL \{ 1800 \}\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 5 \}\par
+\par
+snL4VirtualServerPortHistoryControlOwner OBJECT-TYPE\par
+\tab SYNTAX DisplayString\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The entity that configured this entry and is\par
+\tab\tab therefore using the resources assigned to it."\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 6 \}\par
+\par
+snL4VirtualServerPortHistoryControlStatus OBJECT-TYPE\par
+\tab SYNTAX INTEGER \{ \par
+\tab\tab\tab\tab valid(1),\par
+\tab\tab\tab\tab createRequest(2),\par
+\tab\tab\tab\tab underCreation(3),\par
+\tab\tab\tab\tab invalid(4)\par
+\tab\tab    \}\par
+\tab MAX-ACCESS read-write\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The status of this snL4VirtualServerPortHistoryControl entry.\par
+\tab\tab Each instance of the media-specific table associated\par
+\tab\tab with this snL4VirtualServerPortHistoryControlEntry will be deleted by the\par
+\tab\tab agent if this snL4VirtualServerPortHistoryControlEntry is not equal to\par
+\tab\tab valid(1)."\par
+\tab ::= \{ snL4VirtualServerPortHistoryControlEntry 7 \}\par
+\par
+\par
+-- The Virtual Server Port History Group\par
+\par
+\par
+snL4VirtualServerPortHistoryTable OBJECT-TYPE\par
+\tab SYNTAX SEQUENCE OF SnL4VirtualServerPortHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "A list of Ethernet snL4History entries."\par
+\tab ::= \{ snL4History 8 \}\par
+\par
+snL4VirtualServerPortHistoryEntry OBJECT-TYPE\par
+\tab SYNTAX SnL4VirtualServerPortHistoryEntry\par
+\tab MAX-ACCESS not-accessible\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An historical sample of Ethernet statistics on a\par
+\tab\tab particular Ethernet interface.  This sample is\par
+\tab\tab associated with the snL4VirtualServerPortHistoryControlEntry which set up\par
+\tab\tab the parameters for a regular collection of these\par
+\tab\tab samples.  As an example, an instance of the\par
+\tab\tab snL4VirtualServerPortHistoryReceivePkts object might be named\par
+\tab\tab snL4VirtualServerPortHistoryReceivePkts.2.89"\par
+\tab INDEX \{ snL4VirtualServerPortHistoryIndex , snL4VirtualServerPortHistorySampleIndex \}\par
+\tab ::= \{ snL4VirtualServerPortHistoryTable 1 \}\par
+\par
+SnL4VirtualServerPortHistoryEntry ::= SEQUENCE \{\par
+\tab snL4VirtualServerPortHistoryIndex                 \par
+\tab\tab INTEGER ,\par
+\tab snL4VirtualServerPortHistorySampleIndex           \par
+\tab\tab INTEGER,\par
+\tab snL4VirtualServerPortHistoryIntervalStart         \par
+\tab\tab TimeTicks,\par
+\tab snL4VirtualServerPortHistoryReceivePkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerPortHistoryTransmitPkts\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerPortHistoryTotalConnections\par
+\tab\tab Counter32,\par
+\tab snL4VirtualServerPortHistoryCurConnections\par
+\tab\tab Integer32,\par
+\tab snL4VirtualServerPortHistoryPeakConnections\par
+\tab\tab Integer32\par
+\tab\}\par
+\par
+snL4VirtualServerPortHistoryIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..65535)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The snL4VirtualServerPortHistory of which this entry is a part.The\par
+\tab\tab snL4VirtualServerPortHistory identified by a particular value of this\par
+\tab\tab index is the same snL4VirtualServerPortHistory as identified\par
+\tab\tab by the same value of snL4VirtualServerPortHistoryControlIndex."\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 1 \}\par
+\par
+snL4VirtualServerPortHistorySampleIndex OBJECT-TYPE\par
+\tab SYNTAX INTEGER (1..2147483647)\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "An index that uniquely identifies the particular\par
+\tab\tab sample this entry represents among all samples\par
+\tab\tab associated with the same snL4VirtualServerPortHistoryControlEntry.\par
+\tab\tab This index starts at 1 and increases by one\par
+\tab\tab as each new sample is taken."\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 2 \}\par
+\par
+snL4VirtualServerPortHistoryIntervalStart OBJECT-TYPE\par
+\tab SYNTAX TimeTicks\par
+\tab MAX-ACCESS read-only\par
+\tab STATUS current\par
+\tab DESCRIPTION\par
+\tab\tab "The value of sysUpTime at the start of the interval\par
+\tab\tab over which this sample was measured.If the probe\par
+\tab\tab keeps track of the time of day, it should start\par
+\tab\tab the first sample of the snL4VirtualServerPortHistory at a time such that\par
+\tab\tab when the next hour of the day begins, a sample is\par
+\tab\tab started at that instant.Note that following this\par
+\tab\tab rule may require the probe to delay collecting the\par
+\tab\tab first sample of the snL4VirtualServerPortHistory, as each sample must be\par
+\tab\tab of the same interval.Also note that the sample which\par
+\tab\tab is currently being collected is not accessible in this\par
+\tab\tab table until the end of its interval."\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 3 \}\par
+\par
+\par
+snL4VirtualServerPortHistoryReceivePkts\tab   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 4 \}\par
+\par
+snL4VirtualServerPortHistoryTransmitPkts  OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 5 \}\par
+\par
+snL4VirtualServerPortHistoryTotalConnections   OBJECT-TYPE\par
+\tab SYNTAX\tab Counter32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 6 \}\par
+\par
+snL4VirtualServerPortHistoryCurConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 7 \}\par
+\par
+snL4VirtualServerPortHistoryPeakConnections   OBJECT-TYPE\par
+\tab SYNTAX   Integer32\par
+\tab MAX-ACCESS  read-only\par
+\tab STATUS  current\par
+\tab DESCRIPTION\par
+\tab\tab ""\par
+\tab ::= \{ snL4VirtualServerPortHistoryEntry 8 \}\par
+\par
+END\f1\par
+}
+ 
